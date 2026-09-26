@@ -17,9 +17,9 @@ now the explicit translation boundary between these internal names and the
 frozen external contract. See specs/ARCHITECTURE.md §2.2 for the full note.
 
 Contract-changing rename: `ActType.name_ro`/`ActType.name_en` and
-`DocumentType.name_ro` were collapsed to a single `name` column (Romanian
-content kept, English dropped — the UI is Romanian-only, `name_en` was never
-displayed, per design/UX_SPEC.md). Unlike the rename above, this one DOES
+`DocumentType.name_ro` were collapsed to a single `name` column (`name_en`
+was never displayed and was dropped). The app is now English-only, so the
+seeded `name` values are English. Unlike the rename above, this one DOES
 change the public REST API's JSON field names: `name_ro`/`name_en` no longer
 appear on the wire, `name` does. See specs/ARCHITECTURE.md §2.1/§2.2 and §3.
 """

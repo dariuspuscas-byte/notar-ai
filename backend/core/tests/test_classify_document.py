@@ -46,8 +46,8 @@ async def make_case_with_one_mandatory_doc():
         await session.flush()
         required_type = DocumentType(
             act_type_id=act_type.id,
-            code="extras_cf",
-            name="Extras de carte funciară",
+            code="land_registry_extract",
+            name="Land registry extract",
             is_mandatory=True,
             sort_order=1,
         )
@@ -95,7 +95,7 @@ async def test_unreachable_leaves_pending_classification_no_audit_row():
 
     status = await core.get_case_status(case_row.id)
     assert status.overall_status == "missing_documents"
-    assert "extras_cf" in status.missing_mandatory
+    assert "land_registry_extract" in status.missing_mandatory
 
 
 @pytest.mark.asyncio
@@ -124,7 +124,7 @@ async def test_happy_path_auto_accepts_high_confidence_match():
         message={
             "role": "assistant",
             "content": (
-                '{"predicted_type_code": "extras_cf", "confidence": 0.95, '
+                '{"predicted_type_code": "land_registry_extract", "confidence": 0.95, '
                 '"alternative_type_code": null, "reasoning": "Header reads \'Extras de Carte Funciara\'."}'
             ),
         },
@@ -156,7 +156,7 @@ async def test_low_confidence_routes_to_needs_review():
         message={
             "role": "assistant",
             "content": (
-                '{"predicted_type_code": "extras_cf", "confidence": 0.4, '
+                '{"predicted_type_code": "land_registry_extract", "confidence": 0.4, '
                 '"alternative_type_code": null, "reasoning": "Blurry image, hard to read the header."}'
             ),
         },

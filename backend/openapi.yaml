@@ -402,7 +402,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         code: { type: string, examples: [sale_purchase] }
-        name: { type: string, examples: [Vânzare-cumpărare] }
+        name: { type: string, examples: [Sale-purchase] }
         description: { type: [string, 'null'] }
         status: { $ref: '#/components/schemas/ActTypeStatus' }
         created_at: { type: string, format: date-time }
@@ -413,7 +413,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         act_type_id: { type: string, format: uuid }
-        code: { type: string, examples: [extras_cf] }
+        code: { type: string, examples: [land_registry_extract] }
         name: { type: string }
         description: { type: [string, 'null'] }
         is_mandatory: { type: boolean }

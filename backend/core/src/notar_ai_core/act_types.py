@@ -30,7 +30,7 @@ def to_document_type_dto(row: DocumentType) -> RequiredDocumentTypeDTO:
     call, same as the ORM class it reads from, `DocumentType`, formerly
     `RequiredDocumentType` — see models.py). Its `name` field, however, IS a
     wire contract change: `name_ro`/`name_en` were collapsed to `name`
-    (Romanian content kept) — see the contract-changing-rename note in
+    — see the contract-changing-rename note in
     models.py and specs/ARCHITECTURE.md §2.1/§2.2/§3.
     """
     hints: list[str] = []

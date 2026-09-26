@@ -9,8 +9,8 @@ from notar_ai_core.classification.apply_policy import (
 )
 
 REQUIRED_TYPES = [
-    RequiredTypeForPolicy(id="rt-extras-cf", code="extras_cf"),
-    RequiredTypeForPolicy(id="rt-cert-fiscal", code="certificat_fiscal"),
+    RequiredTypeForPolicy(id="rt-extras-cf", code="land_registry_extract"),
+    RequiredTypeForPolicy(id="rt-cert-fiscal", code="tax_certificate"),
 ]
 
 THRESHOLD = 0.85
@@ -18,7 +18,7 @@ THRESHOLD = 0.85
 
 def output(**overrides) -> RawClassificationOutput:
     defaults = dict(
-        predicted_type_code="extras_cf",
+        predicted_type_code="land_registry_extract",
         confidence=0.95,
         alternative_type_code=None,
         reasoning="Header reads 'Extras de Carte Funciara'.",
@@ -84,7 +84,7 @@ def test_never_produces_rejected_unknown():
     scenarios = [
         output(predicted_type_code="unknown", confidence=0),
         output(predicted_type_code="unknown", confidence=1),
-        output(predicted_type_code="extras_cf", confidence=0),
+        output(predicted_type_code="land_registry_extract", confidence=0),
         output(predicted_type_code="garbage", confidence=0.5),
     ]
     for scenario in scenarios:

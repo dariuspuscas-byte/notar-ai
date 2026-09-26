@@ -1,5 +1,5 @@
 """
-Seeds the two draft act types and their required-document checklists, given
+Seeds the act types and their required-document checklists. The first two are given
 verbatim in spec §8 ("Draft seed data ... to be confirmed with the notary but
 good enough to build against"). Idempotent: safe to re-run (upserts by code).
 
@@ -25,6 +25,8 @@ from notar_ai_core.db import get_session  # noqa: E402
 from notar_ai_core.models import ActType, DocumentType  # noqa: E402
 
 
+# All catalog data is English (codes, names, descriptions, classification
+# hints) — the app is English-only.
 @dataclass
 class RequiredDocSeed:
     code: str
@@ -46,97 +48,183 @@ class ActTypeSeed:
 SEED_ACT_TYPES: list[ActTypeSeed] = [
     ActTypeSeed(
         code="sale_purchase",
-        name="Vânzare-cumpărare",
-        description="Contract de vânzare-cumpărare a unui imobil.",
+        name="Sale-purchase",
+        description="Sale-purchase contract for a property.",
         required_documents=[
             RequiredDocSeed(
-                code="extras_cf",
-                name="Extras de carte funciară actualizat",
-                classification_hints=["carte funciara", "CF", "extras de carte funciara"],
+                code="land_registry_extract",
+                name="Up-to-date land registry extract",
+                classification_hints=["land registry extract", "land book extract", "cadastral number"],
             ),
             RequiredDocSeed(
-                code="act_proprietate",
-                name="Act de proprietate al vânzătorului",
-                classification_hints=["act de proprietate", "titlu de proprietate", "contract de vanzare anterior"],
+                code="title_deed",
+                name="Seller's title deed",
+                classification_hints=["title deed", "property deed", "sale contract"],
             ),
             RequiredDocSeed(
-                code="certificat_fiscal",
-                name="Certificat fiscal — Primărie",
-                classification_hints=["certificat fiscal", "primarie", "impozite si taxe locale"],
+                code="tax_certificate",
+                name="Tax certificate — City Hall",
+                classification_hints=["tax certificate", "city hall", "local taxes"],
             ),
             RequiredDocSeed(
-                code="cert_energetic",
-                name="Certificat de performanță energetică",
-                classification_hints=["certificat energetic", "performanta energetica", "eticheta energetica"],
+                code="energy_certificate",
+                name="Energy performance certificate",
+                classification_hints=["energy performance certificate", "energy label"],
             ),
             RequiredDocSeed(
-                code="id_card_vanzator",
-                name="Carte de identitate vânzător",
+                code="seller_id_card",
+                name="Seller ID card",
                 allow_multiple=True,
-                classification_hints=["carte de identitate", "CI", "buletin"],
+                classification_hints=["identity card", "ID card", "national ID"],
             ),
             RequiredDocSeed(
-                code="id_card_cumparator",
-                name="Carte de identitate cumpărător",
+                code="buyer_id_card",
+                name="Buyer ID card",
                 allow_multiple=True,
-                classification_hints=["carte de identitate", "CI", "buletin"],
+                classification_hints=["identity card", "ID card", "national ID"],
             ),
             RequiredDocSeed(
-                code="cert_casatorie",
-                name="Certificat de căsătorie",
+                code="marriage_certificate",
+                name="Marriage certificate",
                 is_mandatory=False,
-                classification_hints=["certificat de casatorie"],
+                classification_hints=["marriage certificate"],
             ),
             RequiredDocSeed(
-                code="adeverinta_asociatie",
-                name="Adeverință asociație de proprietari",
+                code="homeowners_association_certificate",
+                name="Homeowners' association certificate",
                 is_mandatory=False,
-                classification_hints=["asociatia de proprietari", "adeverinta intretinere"],
+                classification_hints=["homeowners association", "maintenance fees certificate"],
             ),
         ],
     ),
     ActTypeSeed(
         code="succession",
-        name="Succesiune",
-        description="Dezbatere succesorală în urma decesului unei persoane.",
+        name="Succession",
+        description="Succession proceedings following a person's death.",
         required_documents=[
             RequiredDocSeed(
-                code="certificat_deces",
-                name="Certificat de deces",
-                classification_hints=["certificat de deces"],
+                code="death_certificate",
+                name="Death certificate",
+                classification_hints=["death certificate"],
             ),
             RequiredDocSeed(
-                code="acte_stare_civila",
-                name="Certificate de naștere/căsătorie ale moștenitorilor dovedind rudenia",
+                code="civil_status_certificates",
+                name="Heirs' birth/marriage certificates proving kinship",
                 allow_multiple=True,
-                classification_hints=["certificat de nastere", "certificat de casatorie", "stare civila"],
+                classification_hints=["birth certificate", "marriage certificate", "civil status"],
             ),
             RequiredDocSeed(
-                code="id_card_mostenitori",
-                name="Cărți de identitate moștenitori",
+                code="heirs_id_cards",
+                name="Heirs' ID cards",
                 allow_multiple=True,
-                classification_hints=["carte de identitate", "CI", "buletin"],
+                classification_hints=["identity card", "ID card", "national ID"],
             ),
             RequiredDocSeed(
-                code="testament",
-                name="Testament",
+                code="will",
+                name="Will",
                 is_mandatory=False,
-                classification_hints=["testament"],
+                classification_hints=["will", "testament"],
             ),
             RequiredDocSeed(
-                code="extras_cf_defunct",
-                name="Extras CF pentru imobilele din masa succesorală",
-                classification_hints=["carte funciara", "CF", "extras de carte funciara"],
+                code="estate_land_registry_extract",
+                name="Land registry extract for estate properties",
+                classification_hints=["land registry extract", "land book extract", "cadastral number"],
             ),
             RequiredDocSeed(
-                code="act_proprietate_defunct",
-                name="Acte de proprietate ale defunctului",
-                classification_hints=["act de proprietate", "titlu de proprietate"],
+                code="deceased_title_deeds",
+                name="Deceased's title deeds",
+                classification_hints=["title deed", "property deed"],
             ),
             RequiredDocSeed(
-                code="certificat_fiscal",
-                name="Certificat fiscal",
-                classification_hints=["certificat fiscal", "primarie"],
+                code="tax_certificate",
+                name="Tax certificate",
+                classification_hints=["tax certificate", "city hall", "local taxes"],
+            ),
+        ],
+    ),
+    # The act types below are NOT in spec §8: placeholder checklists ported
+    # from the frontend mock data (frontend/src/mocks/seed.ts) so the Act Type
+    # Picker isn't limited to two options. To be confirmed with the notary.
+    ActTypeSeed(
+        code="donation",
+        name="Donation",
+        description="Transfer free of charge.",
+        required_documents=[
+            RequiredDocSeed(
+                code="title_deed",
+                name="Donor's title deed",
+                classification_hints=["title deed", "property deed", "sale contract"],
+            ),
+            RequiredDocSeed(
+                code="land_registry_extract",
+                name="Up-to-date land registry extract",
+                classification_hints=["land registry extract", "land book extract", "cadastral number"],
+            ),
+            RequiredDocSeed(
+                code="donor_id_card",
+                name="Donor ID card",
+                allow_multiple=True,
+                classification_hints=["identity card", "ID card", "national ID"],
+            ),
+            RequiredDocSeed(
+                code="donee_id_card",
+                name="Donee ID card",
+                allow_multiple=True,
+                classification_hints=["identity card", "ID card", "national ID"],
+            ),
+        ],
+    ),
+    ActTypeSeed(
+        code="mortgage",
+        name="Mortgage / Loan",
+        description="Real estate collateral for a loan.",
+        required_documents=[
+            RequiredDocSeed(
+                code="loan_agreement",
+                name="Loan agreement",
+                classification_hints=["loan agreement", "credit agreement", "bank"],
+            ),
+            RequiredDocSeed(
+                code="land_registry_extract",
+                name="Up-to-date land registry extract",
+                classification_hints=["land registry extract", "land book extract", "cadastral number"],
+            ),
+            RequiredDocSeed(
+                code="borrower_id_card",
+                name="Borrower ID card",
+                allow_multiple=True,
+                classification_hints=["identity card", "ID card", "national ID"],
+            ),
+        ],
+    ),
+    ActTypeSeed(
+        code="power_of_attorney",
+        name="Power of attorney",
+        description="Notarial power of attorney.",
+        required_documents=[
+            RequiredDocSeed(
+                code="principal_id_card",
+                name="Principal ID card",
+                classification_hints=["identity card", "ID card", "national ID"],
+            ),
+            RequiredDocSeed(
+                code="agent_id_card",
+                name="Agent ID card",
+                is_mandatory=False,
+                classification_hints=["identity card", "ID card", "national ID"],
+            ),
+        ],
+    ),
+    ActTypeSeed(
+        code="other",
+        name="Other act type",
+        description="Custom document list.",
+        required_documents=[
+            RequiredDocSeed(
+                code="id_card",
+                name="ID card",
+                allow_multiple=True,
+                classification_hints=["identity card", "ID card", "national ID"],
             ),
         ],
     ),

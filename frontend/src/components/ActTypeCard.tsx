@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
 
 interface ActTypeCardProps {
-  nameRo: string
+  name: string
   descriptor: string
   icon: ReactNode
   onClick: () => void
   disabled?: boolean
 }
 
-export function ActTypeCard({ nameRo, descriptor, icon, onClick, disabled }: ActTypeCardProps) {
+export function ActTypeCard({ name, descriptor, icon, onClick, disabled }: ActTypeCardProps) {
   return (
     <button
       type="button"
@@ -20,7 +20,7 @@ export function ActTypeCard({ nameRo, descriptor, icon, onClick, disabled }: Act
         {icon}
       </div>
       <div className="flex flex-col gap-0.5">
-        <span className="text-base font-bold text-gray-900">{nameRo}</span>
+        <span className="text-base font-bold text-gray-900">{name}</span>
         <span className="text-[13px] text-gray-500">{descriptor}</span>
       </div>
     </button>

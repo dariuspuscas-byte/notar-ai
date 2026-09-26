@@ -21,7 +21,7 @@ const ICONS_BY_CODE: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   other: InfoCircleIcon,
 }
 
-// NOTE: GET /act-types (ARCHITECTURE.md §3.1) only returns id/code/name_ro/
+// NOTE: GET /act-types (ARCHITECTURE.md §3.1) only returns id/code/name/
 // status — no one-line descriptor field, even though `act_types.description`
 // exists in the §2.1 schema and the UX mockup shows one per card. Rather than
 // assume the API will add it, this is a small presentational-only lookup by
@@ -89,7 +89,7 @@ export default function ActTypePickerPage() {
                 return (
                   <ActTypeCard
                     key={at.id}
-                    nameRo={at.name_ro}
+                    name={at.name}
                     descriptor={DESCRIPTOR_BY_CODE[at.code] ?? 'Specific document list'}
                     icon={<Icon className="h-6 w-6" />}
                     onClick={() => handlePick(at.id)}

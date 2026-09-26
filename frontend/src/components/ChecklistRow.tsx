@@ -12,7 +12,7 @@ import {
 
 export interface ReassignOption {
   id: string
-  name_ro: string
+  name: string
 }
 
 interface ChecklistRowProps {
@@ -147,7 +147,7 @@ export function ChecklistRow({
         </div>
         <div className="flex flex-1 flex-col gap-0.5">
           <span className="text-[15px] font-semibold text-gray-400 line-through">
-            {item.name_ro}
+            {item.name}
             {mandatoryHint}
           </span>
           <span className="text-[13px] text-gray-400">Marked as not required</span>
@@ -174,7 +174,7 @@ export function ChecklistRow({
         </div>
         <div className="flex flex-1 flex-col gap-0.5">
           <span className="text-[15px] font-semibold text-gray-900">
-            {item.name_ro}
+            {item.name}
             {mandatoryHint}
           </span>
           <span className="text-[13px] text-gray-500">
@@ -213,7 +213,7 @@ export function ChecklistRow({
           <div className="flex flex-1 flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="text-[15px] font-semibold text-gray-900">
-                {item.name_ro}
+                {item.name}
                 {mandatoryHint}
               </span>
               <StatusPill tone="amber">To confirm</StatusPill>
@@ -276,7 +276,7 @@ export function ChecklistRow({
                     }}
                     className="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                   >
-                    {opt.name_ro}
+                    {opt.name}
                   </button>
                 ))}
               </div>
@@ -327,7 +327,7 @@ export function ChecklistRow({
       </div>
       <div className="flex flex-1 flex-col gap-0.5">
         <span className="text-[15px] font-semibold text-gray-700">
-          {item.name_ro}
+          {item.name}
           {mandatoryHint}
         </span>
         <span className="text-[13px] text-gray-400">Not uploaded</span>

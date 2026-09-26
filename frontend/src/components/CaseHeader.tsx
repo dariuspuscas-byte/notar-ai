@@ -4,14 +4,14 @@ import { formatDate } from '../lib/format'
 
 interface CaseHeaderProps {
   theCase: Case
-  actTypeNameRo: string
+  actTypeName: string
   onRename: (name: string) => void
   /** Reports the not-yet-submitted name while editing (null when not editing),
    * so the page can save it if the user leaves mid-edit. */
   onDraftChange?: (name: string | null) => void
 }
 
-export function CaseHeader({ theCase, actTypeNameRo, onRename, onDraftChange }: CaseHeaderProps) {
+export function CaseHeader({ theCase, actTypeName, onRename, onDraftChange }: CaseHeaderProps) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(theCase.client_name)
 
@@ -51,7 +51,7 @@ export function CaseHeader({ theCase, actTypeNameRo, onRename, onDraftChange }: 
               {theCase.client_name || 'New client'}
             </h1>
             <span className="rounded px-2.5 py-1 text-xs font-semibold text-blue-700" style={{ background: '#E9F0FB' }}>
-              {actTypeNameRo}
+              {actTypeName}
             </span>
           </div>
         )}

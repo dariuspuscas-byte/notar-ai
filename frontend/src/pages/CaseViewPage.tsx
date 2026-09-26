@@ -22,8 +22,6 @@ import { getDocumentFileUrl } from '../lib/documentFile'
 import { generateClientMessage } from '../lib/messageTemplate'
 import type { Document } from '../types/api'
 
-const PLACEHOLDER_NAMES = new Set(['New client', 'Client nou'])
-
 interface InFlightUpload {
   id: string
   filenames: string[]
@@ -52,8 +50,8 @@ export default function CaseViewPage() {
   const [messageOpen, setMessageOpen] = useState(false)
   const [draftName, setDraftName] = useState<string | null>(null)
 
-  const actTypeNameRo = useMemo(
-    () => actTypes?.find((a) => a.id === theCase?.act_type_id)?.name_ro ?? '',
+  const actTypeName = useMemo(
+    () => actTypes?.find((a) => a.id === theCase?.act_type_id)?.name ?? '',
     [actTypes, theCase],
   )
 
@@ -107,11 +105,11 @@ export default function CaseViewPage() {
   }
 
   const allReassignOptions: ReassignOption[] =
-    status?.checklist.map((i) => ({ id: i.required_document_type_id, name_ro: i.name_ro })) ?? []
+    status?.checklist.map((i) => ({ id: i.required_document_type_id, name: i.name })) ?? []
 
   const missingItemNames = (status?.checklist ?? [])
     .filter((i) => i.status === 'missing')
-    .map((i) => i.name_ro)
+    .map((i) => i.name)
 
   const missingCount = status?.missing_mandatory.length ?? 0
   const pendingReviewCount = status?.pending_review_count ?? 0
@@ -122,13 +120,12 @@ export default function CaseViewPage() {
   const hasPendingRename = !!theCase && pendingName !== '' && pendingName !== theCase.client_name
 
   // "Empty" = still the placeholder name, no files, no manual overrides.
-  // "Client nou" is the placeholder older cases were created with.
   const hasManualOverride = (status?.checklist ?? []).some(
     (i) => i.status === 'not_applicable' || (i.status === 'received' && !i.matched_document_id),
   )
   const caseHasContent =
     hasPendingRename ||
-    (!!theCase && theCase.client_name.trim() !== '' && !PLACEHOLDER_NAMES.has(theCase.client_name)) ||
+    (!!theCase && theCase.client_name.trim() !== '' && theCase.client_name !== 'New client') ||
     !!theCase?.notes ||
     (documents?.length ?? 0) > 0 ||
     hasManualOverride
@@ -193,7 +190,7 @@ export default function CaseViewPage() {
         <>
           <CaseHeader
             theCase={theCase}
-            actTypeNameRo={actTypeNameRo}
+            actTypeName={actTypeName}
             onRename={(name) => updateCaseMutation.mutate({ client_name: name })}
             onDraftChange={setDraftName}
           />
@@ -233,7 +230,7 @@ export default function CaseViewPage() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  Required documents for {actTypeNameRo.toLowerCase()}
+                  Required documents for {actTypeName.toLowerCase()}
                 </span>
                 <button
                   type="button"
@@ -320,7 +317,7 @@ export default function CaseViewPage() {
 
       {status && messageOpen && (
         <GenerateMessageModal
-          initialText={generateClientMessage(actTypeNameRo, missingItemNames)}
+          initialText={generateClientMessage(actTypeName, missingItemNames)}
           onClose={() => setMessageOpen(false)}
         />
       )}

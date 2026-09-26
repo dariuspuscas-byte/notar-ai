@@ -47,12 +47,12 @@ const actTypes: DbActType[] = SEED_ACT_TYPES.map((seed) => {
   return {
     id: actTypeId,
     code: seed.code,
-    name_ro: seed.name_ro,
+    name: seed.name,
     status: 'draft',
     requiredDocumentTypes: seed.requiredDocumentTypes.map((rdt) => ({
       id: uuid(),
       code: rdt.code,
-      name_ro: rdt.name_ro,
+      name: rdt.name,
       description: rdt.description,
       is_mandatory: rdt.is_mandatory,
       allow_multiple: rdt.allow_multiple,
@@ -77,7 +77,7 @@ const overrides: DbOverride[] = []
 export const notFound = (message: string) => new Error(`NOT_FOUND:${message}`)
 
 export function listActTypes(): ActType[] {
-  return actTypes.map(({ id, code, name_ro, status }) => ({ id, code, name_ro, status }))
+  return actTypes.map(({ id, code, name, status }) => ({ id, code, name, status }))
 }
 
 export function getActType(actTypeId: string): DbActType | undefined {
@@ -201,7 +201,7 @@ function mockClassify(
       predicted_required_document_type_id: bestType.id,
       predicted_type_code_raw: bestType.code,
       confidence: 0.9 + Math.random() * 0.09,
-      reasoning: `The filename and content appear to match "${bestType.name_ro}".`,
+      reasoning: `The filename and content appear to match "${bestType.name}".`,
     }
   }
   if (bestType && bestScore >= 0.5) {
@@ -209,7 +209,7 @@ function mockClassify(
       predicted_required_document_type_id: bestType.id,
       predicted_type_code_raw: bestType.code,
       confidence: 0.5 + Math.random() * 0.3,
-      reasoning: `The document looks partly similar to "${bestType.name_ro}", but image quality or missing key elements reduce certainty.`,
+      reasoning: `The document looks partly similar to "${bestType.name}", but image quality or missing key elements reduce certainty.`,
     }
   }
   // no filename signal at all — either guess a random known type at low
@@ -229,7 +229,7 @@ function mockClassify(
     predicted_required_document_type_id: fallback.id,
     predicted_type_code_raw: fallback.code,
     confidence: 0.35 + Math.random() * 0.3,
-    reasoning: `The most likely match is "${fallback.name_ro}", but confidence is low.`,
+    reasoning: `The most likely match is "${fallback.name}", but confidence is low.`,
   }
 }
 
@@ -346,7 +346,7 @@ export function computeStatus(caseId: string): {
   checklist: {
     required_document_type_id: string
     code: string
-    name_ro: string
+    name: string
     is_mandatory: boolean
     status: 'received' | 'missing' | 'not_applicable' | 'pending_review'
     matched_document_id: string | null
@@ -370,7 +370,7 @@ export function computeStatus(caseId: string): {
         return {
           required_document_type_id: rdt.id,
           code: rdt.code,
-          name_ro: rdt.name_ro,
+          name: rdt.name,
           is_mandatory: rdt.is_mandatory,
           status: override.override_status,
           matched_document_id: null,
@@ -388,7 +388,7 @@ export function computeStatus(caseId: string): {
         return {
           required_document_type_id: rdt.id,
           code: rdt.code,
-          name_ro: rdt.name_ro,
+          name: rdt.name,
           is_mandatory: rdt.is_mandatory,
           status: 'received' as const,
           matched_document_id: receivedDoc.id,
@@ -404,7 +404,7 @@ export function computeStatus(caseId: string): {
         return {
           required_document_type_id: rdt.id,
           code: rdt.code,
-          name_ro: rdt.name_ro,
+          name: rdt.name,
           is_mandatory: rdt.is_mandatory,
           status: 'pending_review' as const,
           matched_document_id: pendingDoc.id,
@@ -415,7 +415,7 @@ export function computeStatus(caseId: string): {
       return {
         required_document_type_id: rdt.id,
         code: rdt.code,
-        name_ro: rdt.name_ro,
+        name: rdt.name,
         is_mandatory: rdt.is_mandatory,
         status: 'missing' as const,
         matched_document_id: null,

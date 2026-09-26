@@ -386,10 +386,9 @@ intentionally differ in this one respect.
 
 ## Contract-changing rename: `name_ro`/`name_en` → `name` (post-rewrite)
 
-`ActType` (spec §2.1) had both `name_ro` (Romanian display name) and
-`name_en` ("for internal/dev reference"); `DocumentType` (spec §2.2) had
-`name_ro`. `name_en` was never displayed anywhere — the UI is Romanian-only
-(design/UX_SPEC.md) — so it was dropped entirely; `name_ro` was renamed to
+`ActType` (spec §2.1) had both `name_ro` and `name_en` ("for internal/dev
+reference"); `DocumentType` (spec §2.2) had `name_ro`. `name_en` was never
+displayed anywhere, so it was dropped entirely; `name_ro` was renamed to
 `name` on both tables/ORM classes/DTOs.
 
 **Unlike the `required_document_types` → `document_types` rename above, this
@@ -413,8 +412,8 @@ reader ever consumed it). Run against the real dev DB: row counts unchanged
 across all 7 tables (2 `act_types`, 15 `document_types`, 1 `cases`, 2
 `documents`, 3 `classification_results`, 2 `document_reviews`, 1
 `checklist_overrides`), every `act_types.name`/`document_types.name` value
-spot-checked equal to the pre-migration `name_ro` value (e.g.
-"Vânzare-cumpărare", "Succesiune" preserved exactly), `name_en`'s old values
+spot-checked equal to the pre-migration `name_ro` value (names
+preserved exactly; they were translated to English later), `name_en`'s old values
 gone as expected, `PRAGMA foreign_key_check`/`PRAGMA integrity_check` both
 clean.
 
@@ -432,7 +431,7 @@ statement.
   machine — see the caveat below on the configured default) -> got back real
   structured JSON, correctly routed to `needs_review` (`unknown`, since the
   test image was a plain color block) -> `/classify` retrigger returned the
-  same real result -> `/review` with `reassign` to `extras_cf` -> document
+  same real result -> `/review` with `reassign` to `land_registry_extract` -> document
   `confirmed`, checklist item cleared from `missing_mandatory`, confirmed the
   `document_reviews` row (`decision=reassign`, correct
   prior/final matched type, `classification_result_id` linked, `reviewed_by`

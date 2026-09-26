@@ -35,7 +35,7 @@ index definitions when a renamed column is indexed (neither `name_ro` nor
 `name_en` is indexed on either table here, so there is nothing dependent to
 verify beyond the column data itself). Verified against the real dev DB (see
 the rename task's report for before/after row counts and a spot-check of
-preserved Romanian values, e.g. "Vânzare-cumpărare" / "Succesiune").
+preserved `name_ro` values).
 """
 from typing import Sequence, Union
 

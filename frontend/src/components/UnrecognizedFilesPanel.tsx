@@ -82,7 +82,7 @@ function UnrecognizedRow({
                   }}
                   className="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  {opt.name_ro}
+                  {opt.name}
                 </button>
               ))}
             </div>

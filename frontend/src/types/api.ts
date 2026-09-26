@@ -14,7 +14,7 @@ export type ActTypeStatus = 'draft' | 'in_progress' | 'ready' | 'completed'
 export interface ActType {
   id: string
   code: string
-  name_ro: string
+  name: string
   status: ActTypeStatus
 }
 
@@ -23,7 +23,7 @@ export interface ActType {
 export interface RequiredDocumentType {
   id: string
   code: string
-  name_ro: string
+  name: string
   description: string | null
   is_mandatory: boolean
   allow_multiple: boolean
@@ -161,7 +161,7 @@ export type ChecklistItemStatus = 'received' | 'missing' | 'not_applicable' | 'p
 export interface CaseStatusChecklistItem {
   required_document_type_id: string
   code: string
-  name_ro: string
+  name: string
   is_mandatory: boolean
   status: ChecklistItemStatus
   matched_document_id: string | null

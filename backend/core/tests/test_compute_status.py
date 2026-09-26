@@ -14,7 +14,7 @@ from notar_ai_core.cases.compute_status import (
 
 
 def required_type(**overrides) -> RequiredTypeRow:
-    defaults = dict(id="rt-1", code="extras_cf", name="Extras CF", is_mandatory=True)
+    defaults = dict(id="rt-1", code="land_registry_extract", name="Land registry extract", is_mandatory=True)
     defaults.update(overrides)
     return RequiredTypeRow(**defaults)
 

@@ -37,7 +37,7 @@ export default function CaseListPage() {
 
   const actTypeNameById = useMemo(() => {
     const map = new Map<string, string>()
-    actTypes?.forEach((at) => map.set(at.id, at.name_ro))
+    actTypes?.forEach((at) => map.set(at.id, at.name))
     return map
   }, [actTypes])
 
