@@ -1,0 +1,14 @@
+{
+  "artboards": [
+    { "file": "ActTypePicker.dc.html", "x": 0, "y": 0, "w": 1200, "h": 800, "title": "1. Choose act type" },
+    { "file": "Main.dc.html", "x": 1320, "y": 0, "w": 1440, "h": 1010, "title": "2-5. Case checklist — missing documents" },
+    { "file": "ReadyToSign.dc.html", "x": 1320, "y": 1130, "w": 1440, "h": 1010, "title": "5. Case checklist — ready to sign" },
+    { "file": "Tablet.dc.html", "x": 0, "y": 880, "w": 834, "h": 1360, "title": "Tablet width (responsive)" }
+  ],
+  "annotations": [
+    { "id": "note-flow", "x": 0, "y": -100, "w": 1200, "text": "Notary assistant checklist tool — flow: pick act type → dump uploads → AI verifies in background → assistant confirms low-confidence matches inline → case-level status always visible." },
+    { "id": "note-core", "x": 1320, "y": -100, "w": 1440, "text": "Core screen. Upload, verification, validation and status all live on ONE persistent view — no separate wizard steps 2-5, since documents trickle in over days and the assistant revisits constantly." },
+    { "id": "note-tablet", "x": 0, "y": 780, "w": 834, "text": "Responsive: banner stacks, single column, 44px+ touch targets, condensed top bar." }
+  ],
+  "launch": { "view": "focused", "file": "Main.dc.html" }
+}

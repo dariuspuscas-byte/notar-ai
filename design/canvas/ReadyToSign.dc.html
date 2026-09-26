@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  a { color: #2C5AA6; text-decoration: none; }
+  a:hover { color: #1F4278; }
+  .row-btn { cursor: pointer; border: none; font-family: inherit; }
+</style>
+</helmet>
+
+<div style="width:1440px; min-height:1010px; background:#F7F8FA; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color:#1A1D23; display:flex; flex-direction:column;">
+
+  <!-- Top bar -->
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:60px; background:#FFFFFF; border-bottom:1px solid #E2E5EA; flex-shrink:0;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <span style="font-size:14px; color:#6B7280; font-weight:500;">Toate dosarele</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="font-size:14px; color:#6B7280;">Ana Popescu</span>
+      <div style="width:30px; height:30px; border-radius:50%; background:#2C5AA6; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600;">AP</div>
+    </div>
+  </div>
+
+  <!-- Case header -->
+  <div style="padding:24px 48px 18px; display:flex; align-items:flex-start; justify-content:space-between; flex-shrink:0;">
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <h1 style="margin:0; font-size:22px; font-weight:700;">Mihai &amp; Elena Dumitrescu</h1>
+        <span style="font-size:12px; font-weight:600; color:#2C5AA6; background:#E9F0FB; padding:4px 10px; border-radius:4px;">Succesiune</span>
+      </div>
+      <span style="font-size:13px; color:#6B7280;">Dosar #479 &middot; deschis 3 sept 2026</span>
+    </div>
+    <button class="row-btn" style="background:transparent; border:1px solid #D8DBE0; color:#4B5563; font-size:13px; font-weight:600; padding:8px 14px; border-radius:6px;">Editează tipul actului</button>
+  </div>
+
+  <!-- Status banner: ready to sign -->
+  <div style="margin:0 48px 20px; padding:16px 20px; background:#E9F7EF; border:1px solid #BFE6CD; border-radius:8px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E7B49" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:15px; font-weight:700; color:#175E3A;">Dosar complet &middot; pregătit de semnare</span>
+        <span style="font-size:13px; color:#2A7A50;">Toate documentele au fost primite și confirmate</span>
+      </div>
+    </div>
+    <button class="row-btn" style="display:flex; align-items:center; gap:8px; background:#1E7B49; color:#fff; padding:11px 18px; border-radius:6px; font-size:14px; font-weight:600;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Marchează dosar semnat
+    </button>
+  </div>
+
+  <!-- Upload dropzone (kept available even when complete, for late corrections) -->
+  <div style="margin:0 48px 20px; padding:18px; border:1.5px dashed #C7CBD1; border-radius:8px; background:#FFFFFF; display:flex; align-items:center; justify-content:center; gap:10px; flex-shrink:0;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <span style="font-size:14px; color:#6B7280;">Trage fișiere aici sau <span style="color:#2C5AA6; font-weight:600;">apasă pentru a încărca</span> un document înlocuitor</span>
+  </div>
+
+  <!-- Checklist -->
+  <div style="margin:0 48px; display:flex; flex-direction:column; gap:8px; padding-bottom:32px;">
+
+    <div style="display:flex; padding:0 18px 4px; font-size:12px; font-weight:600; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.03em;">
+      <span>Documente necesare pentru succesiune</span>
+    </div>
+
+    <!-- Row: RECEIVED -->
+    <div style="display:flex; align-items:center; gap:16px; background:#fff; border:1px solid #E2E5EA; border-radius:8px; padding:13px 18px;">
+      <div style="width:40px;height:40px;border-radius:6px;background:#E6F4EC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E8E5A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:15px; font-weight:600;">Certificat de deces</span>
+        <span style="font-size:13px; color:#6B7280;">Primit &middot; recunoscut automat</span>
+      </div>
+      <span style="font-size:12px; font-weight:700; color:#1E8E5A; background:#E6F4EC; padding:5px 12px; border-radius:20px;">Primit</span>
+      <a href="#" style="font-size:13px; font-weight:600; width:84px; text-align:right;">Vizualizează</a>
+    </div>
+
+    <!-- Row: RECEIVED -->
+    <div style="display:flex; align-items:center; gap:16px; background:#fff; border:1px solid #E2E5EA; border-radius:8px; padding:13px 18px;">
+      <div style="width:40px;height:40px;border-radius:6px;background:#E6F4EC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E8E5A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:15px; font-weight:600;">Certificate de naștere (moștenitori)</span>
+        <span style="font-size:13px; color:#6B7280;">Primit &middot; confirmat de Ana Popescu</span>
+      </div>
+      <span style="font-size:12px; font-weight:700; color:#1E8E5A; background:#E6F4EC; padding:5px 12px; border-radius:20px;">Primit</span>
+      <a href="#" style="font-size:13px; font-weight:600; width:84px; text-align:right;">Vizualizează</a>
+    </div>
+
+    <!-- Row: RECEIVED -->
+    <div style="display:flex; align-items:center; gap:16px; background:#fff; border:1px solid #E2E5EA; border-radius:8px; padding:13px 18px;">
+      <div style="width:40px;height:40px;border-radius:6px;background:#E6F4EC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E8E5A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:15px; font-weight:600;">Certificat de calitate de moștenitor</span>
+        <span style="font-size:13px; color:#6B7280;">Primit &middot; recunoscut automat</span>
+      </div>
+      <span style="font-size:12px; font-weight:700; color:#1E8E5A; background:#E6F4EC; padding:5px 12px; border-radius:20px;">Primit</span>
+      <a href="#" style="font-size:13px; font-weight:600; width:84px; text-align:right;">Vizualizează</a>
+    </div>
+
+    <!-- Row: N/A -->
+    <div style="display:flex; align-items:center; gap:16px; background:#FAFAFA; border:1px solid #ECEDEF; border-radius:8px; padding:13px 18px; opacity:0.72;">
+      <div style="width:40px;height:40px;border-radius:6px;background:#EFEFEF;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B0B4BB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="5.5" y1="5.5" x2="18.5" y2="18.5"/></svg>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:15px; font-weight:600; color:#9CA3AF; text-decoration:line-through;">Testament</span>
+        <span style="font-size:13px; color:#B0B4BB;">Marcat ca nefiind necesar &middot; succesiune legală</span>
+      </div>
+      <span style="font-size:12px; font-weight:700; color:#9CA3AF; background:#EFEFEF; padding:5px 12px; border-radius:20px;">N/A</span>
+      <a href="#" style="font-size:13px; font-weight:600; color:#9CA3AF; width:84px; text-align:right;">Readu</a>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

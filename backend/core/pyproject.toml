@@ -1,0 +1,39 @@
+[project]
+name = "notar-ai-core"
+version = "0.1.0"
+description = "notar-ai domain logic, use-cases, DB access, storage, classifier — the ONLY place business rules live (specs/ARCHITECTURE.md §1.3)."
+requires-python = ">=3.11"
+dependencies = [
+  "sqlalchemy>=2.0.36",
+  "aiosqlite>=0.20",
+  "asyncpg>=0.30",
+  "psycopg2-binary>=2.9",
+  "greenlet>=3.1",
+  "alembic>=1.14",
+  "httpx>=0.27",
+  "pillow>=11.0",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "mypy>=1.13",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true

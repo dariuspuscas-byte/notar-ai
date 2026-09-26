@@ -1,0 +1,615 @@
+openapi: 3.1.0
+info:
+  title: notar-ai API
+  version: 0.1.0
+  description: |
+    REST API exposed by the notar-ai backend (`backend/api`, FastAPI).
+    Hand-written from the route handlers in `api/src/notar_ai_api/routes/` and
+    the DTOs in `core/src/notar_ai_core/types.py`, because the routes parse raw
+    request bodies and return untyped dicts, so FastAPI's generated `/openapi.json`
+    has no request/response schemas. Keep this file in sync when routes change.
+
+    Every error uses the same shape (see `ErrorResponse`).
+# No authentication: internal tool on the office LAN.
+security: []
+servers:
+  - url: http://localhost:3000
+    description: Local dev (PORT in backend/.env)
+tags:
+  - name: Act types
+    description: Catalog of legal act types and their required-document checklists
+  - name: Cases
+    description: Client cases and their derived status
+  - name: Documents
+    description: Document upload, AI classification and human review
+  - name: Checklist
+    description: Manual overrides of checklist items
+  - name: Health
+    description: Liveness check
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: health
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: ok }
+                required: [status]
+
+  /api/v1/act-types:
+    get:
+      tags: [Act types]
+      summary: List act types
+      description: Returns every act type, in any status, ordered by name.
+      operationId: listActTypes
+      responses:
+        '200':
+          description: Act types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/ActType' }
+                required: [items]
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/act-types/{act_type_id}/checklist:
+    get:
+      tags: [Act types]
+      summary: Get the required-document checklist template for an act type
+      operationId: getActTypeChecklist
+      parameters:
+        - $ref: '#/components/parameters/ActTypeId'
+      responses:
+        '200':
+          description: Checklist items, ordered by sort_order
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/RequiredDocumentType' }
+                required: [items]
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/cases:
+    post:
+      tags: [Cases]
+      summary: Create a case
+      operationId: createCase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCaseRequest' }
+      responses:
+        '201':
+          description: Created case
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Case' }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    get:
+      tags: [Cases]
+      summary: List cases
+      operationId: listCases
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Filter by overall status. Any other value returns 400 `invalid_status_filter`.
+          schema: { $ref: '#/components/schemas/OverallStatus' }
+      responses:
+        '200':
+          description: Cases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Case' }
+                required: [items]
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/cases/{case_id}:
+    parameters:
+      - $ref: '#/components/parameters/CaseId'
+    get:
+      tags: [Cases]
+      summary: Get a case
+      operationId: getCase
+      responses:
+        '200':
+          description: Case
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Case' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    patch:
+      tags: [Cases]
+      summary: Update a case's client name and/or notes
+      description: |
+        Only `client_name` and `notes` are updatable. Any other body field
+        (`act_type_id`, `status`, ...) is ignored. `status` is always derived
+        by the backend.
+      operationId: updateCase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateCaseRequest' }
+      responses:
+        '200':
+          description: Updated case
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Case' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/cases/{case_id}/status:
+    get:
+      tags: [Cases]
+      summary: Get a case's derived checklist status
+      operationId: getCaseStatus
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+      responses:
+        '200':
+          description: Case status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CaseStatus' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/cases/{case_id}/validate:
+    post:
+      tags: [Cases]
+      summary: Recompute and persist a case's status
+      operationId: validateCase
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+      responses:
+        '200':
+          description: Recomputed case status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CaseStatus' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/cases/{case_id}/documents:
+    parameters:
+      - $ref: '#/components/parameters/CaseId'
+    post:
+      tags: [Documents]
+      summary: Upload one or more documents and classify them
+      description: |
+        Multipart upload. Files go in the `files` (or `files[]`) field; max 25 MB
+        per file. Each file is classified synchronously. A per-file
+        classification failure does not fail the request: that item comes back
+        with `classification_error` set and status `pending_classification`.
+      operationId: uploadDocuments
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items: { type: string, format: binary }
+                uploaded_by:
+                  type: string
+              required: [files]
+            encoding:
+              files:
+                contentType: image/*, application/pdf
+      responses:
+        '201':
+          description: Uploaded documents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/UploadedDocument' }
+                required: [items]
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    get:
+      tags: [Documents]
+      summary: List a case's documents
+      operationId: listDocuments
+      responses:
+        '200':
+          description: Documents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Document' }
+                required: [items]
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/cases/{case_id}/documents/{document_id}/classify:
+    post:
+      tags: [Documents]
+      summary: (Re)run classification for a document
+      operationId: classifyDocument
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Classification outcome
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClassifyDocumentResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/cases/{case_id}/documents/{document_id}/review:
+    post:
+      tags: [Documents]
+      summary: Confirm, reassign or reject a document's classification
+      operationId: reviewDocument
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewRequest' }
+      responses:
+        '200':
+          description: Reviewed document
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/cases/{case_id}/checklist/{required_document_type_id}/override:
+    post:
+      tags: [Checklist]
+      summary: Manually override a checklist item's status
+      description: Set `override_status` to `missing` to clear a previous manual override ("Restore" in the UI).
+      operationId: setChecklistOverride
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+        - name: required_document_type_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChecklistOverrideRequest' }
+      responses:
+        '200':
+          description: Stored override
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChecklistOverride' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+components:
+  parameters:
+    CaseId:
+      name: case_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ActTypeId:
+      name: act_type_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    DocumentId:
+      name: document_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            invalidClientName:
+              value: { error: { code: invalid_client_name, message: client_name must not be blank } }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            caseNotFound:
+              value: { error: { code: case_not_found, message: Case 123 not found } }
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            internal:
+              value: { error: { code: internal_error, message: Unexpected server error } }
+
+  schemas:
+    # ---- enums -----------------------------------------------------------
+    ActTypeStatus:
+      type: string
+      enum: [draft, in_progress, ready, completed]
+    OverallStatus:
+      type: string
+      description: Derived by the backend; never set by clients.
+      enum: [ready_to_sign, missing_documents, pending_review]
+    DocumentStatus:
+      type: string
+      enum: [pending_classification, classified_auto, needs_review, confirmed, rejected]
+    ClassificationDecision:
+      type: string
+      enum: [auto_accepted, needs_review, rejected_unknown]
+    OverrideStatus:
+      type: string
+      enum: [received, missing, not_applicable]
+    ChecklistItemStatus:
+      type: string
+      enum: [received, missing, not_applicable, pending_review]
+
+    # ---- resources -------------------------------------------------------
+    ActType:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string, examples: [sale_purchase] }
+        name: { type: string, examples: [Vânzare-cumpărare] }
+        description: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/ActTypeStatus' }
+        created_at: { type: string, format: date-time }
+      required: [id, code, name, description, status, created_at]
+
+    RequiredDocumentType:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        act_type_id: { type: string, format: uuid }
+        code: { type: string, examples: [extras_cf] }
+        name: { type: string }
+        description: { type: [string, 'null'] }
+        is_mandatory: { type: boolean }
+        allow_multiple: { type: boolean }
+        sort_order: { type: integer }
+        classification_hints:
+          type: array
+          items: { type: string }
+      required: [id, act_type_id, code, name, description, is_mandatory, allow_multiple, sort_order, classification_hints]
+
+    Case:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        act_type_id: { type: string, format: uuid }
+        client_name: { type: string }
+        notes: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/OverallStatus' }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        created_by: { type: [string, 'null'] }
+      required: [id, act_type_id, client_name, notes, status, created_at, updated_at, created_by]
+
+    CaseStatus:
+      type: object
+      properties:
+        case_id: { type: string, format: uuid }
+        overall_status: { $ref: '#/components/schemas/OverallStatus' }
+        checklist:
+          type: array
+          items: { $ref: '#/components/schemas/ChecklistItem' }
+        missing_mandatory:
+          type: array
+          description: required_document_type_ids of mandatory items still missing
+          items: { type: string, format: uuid }
+        pending_review_count: { type: integer }
+      required: [case_id, overall_status, checklist, missing_mandatory, pending_review_count]
+
+    ChecklistItem:
+      type: object
+      properties:
+        required_document_type_id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        is_mandatory: { type: boolean }
+        status: { $ref: '#/components/schemas/ChecklistItemStatus' }
+        matched_document_id: { type: [string, 'null'], format: uuid }
+        confidence: { type: [number, 'null'], minimum: 0, maximum: 1 }
+      required: [required_document_type_id, code, name, is_mandatory, status, matched_document_id, confidence]
+
+    Document:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        case_id: { type: string, format: uuid }
+        matched_required_document_type_id: { type: [string, 'null'], format: uuid }
+        original_filename: { type: string }
+        mime_type: { type: string }
+        file_size_bytes: { type: integer }
+        status: { $ref: '#/components/schemas/DocumentStatus' }
+        uploaded_at: { type: string, format: date-time }
+        uploaded_by: { type: [string, 'null'] }
+      required: [id, case_id, matched_required_document_type_id, original_filename, mime_type, file_size_bytes, status, uploaded_at, uploaded_by]
+
+    UploadedDocument:
+      allOf:
+        - $ref: '#/components/schemas/Document'
+        - type: object
+          properties:
+            classification_error:
+              type: string
+              description: Present only when classifying this file failed.
+
+    ClassificationResult:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        document_id: { type: string, format: uuid }
+        predicted_required_document_type_id: { type: [string, 'null'], format: uuid }
+        predicted_type_code_raw: { type: string }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        alternative_type_code_raw: { type: [string, 'null'] }
+        reasoning: { type: string }
+        decision: { $ref: '#/components/schemas/ClassificationDecision' }
+        model_used: { type: string }
+        created_at: { type: string, format: date-time }
+      required: [id, document_id, predicted_required_document_type_id, predicted_type_code_raw, confidence, alternative_type_code_raw, reasoning, decision, model_used, created_at]
+
+    ClassifyDocumentResponse:
+      type: object
+      properties:
+        document: { $ref: '#/components/schemas/Document' }
+        classification_result:
+          oneOf:
+            - $ref: '#/components/schemas/ClassificationResult'
+            - type: 'null'
+        classification_error:
+          type: string
+          description: Present only when classification failed.
+      required: [document, classification_result]
+
+    ChecklistOverride:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        case_id: { type: string, format: uuid }
+        required_document_type_id: { type: string, format: uuid }
+        override_status: { $ref: '#/components/schemas/OverrideStatus' }
+        note: { type: [string, 'null'] }
+        set_by: { type: [string, 'null'] }
+        set_at: { type: string, format: date-time }
+      required: [id, case_id, required_document_type_id, override_status, note, set_by, set_at]
+
+    # ---- requests --------------------------------------------------------
+    CreateCaseRequest:
+      type: object
+      properties:
+        act_type_id: { type: string, format: uuid }
+        client_name:
+          type: string
+          description: Required and must not be blank (400 `invalid_client_name`). Trimmed.
+        notes: { type: [string, 'null'] }
+        created_by: { type: [string, 'null'] }
+      required: [act_type_id, client_name]
+
+    UpdateCaseRequest:
+      type: object
+      properties:
+        client_name:
+          type: string
+          description: Trimmed; blank returns 400 `invalid_client_name`. Omit to leave unchanged.
+        notes:
+          type: string
+          description: Omit to leave unchanged.
+
+    ReviewRequest:
+      oneOf:
+        - $ref: '#/components/schemas/ConfirmReview'
+        - $ref: '#/components/schemas/ReassignReview'
+        - $ref: '#/components/schemas/RejectReview'
+      discriminator:
+        propertyName: decision
+        mapping:
+          confirm: '#/components/schemas/ConfirmReview'
+          reassign: '#/components/schemas/ReassignReview'
+          reject: '#/components/schemas/RejectReview'
+
+    ConfirmReview:
+      type: object
+      properties:
+        decision: { type: string, const: confirm }
+        reviewed_by: { type: string }
+      required: [decision]
+
+    ReassignReview:
+      type: object
+      properties:
+        decision: { type: string, const: reassign }
+        required_document_type_id: { type: string, format: uuid }
+        reviewed_by: { type: string }
+      required: [decision, required_document_type_id]
+
+    RejectReview:
+      type: object
+      properties:
+        decision: { type: string, const: reject }
+        note: { type: string }
+        reviewed_by: { type: string }
+      required: [decision]
+
+    ChecklistOverrideRequest:
+      type: object
+      properties:
+        override_status: { $ref: '#/components/schemas/OverrideStatus' }
+        note: { type: [string, 'null'] }
+        set_by: { type: [string, 'null'] }
+      required: [override_status]
+
+    # ---- errors ----------------------------------------------------------
+    ErrorResponse:
+      type: object
+      description: |
+        Uniform error shape. Known codes:
+        400: invalid_act_type_id, invalid_client_name, invalid_notes,
+        invalid_status_filter, no_files_uploaded, upload_limit_file_size,
+        invalid_review_decision, missing_required_document_type_id,
+        required_document_type_mismatch, cannot_confirm_unmatched_document,
+        missing_override_status, invalid_override_status.
+        404: case_not_found, act_type_not_found, document_not_found,
+        required_document_type_not_found.
+        500: internal_error.
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+          required: [code, message]
+      required: [error]
