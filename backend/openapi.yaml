@@ -263,6 +263,30 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/cases/{case_id}/documents/{document_id}/file:
+    get:
+      tags: [Documents]
+      summary: Download/view a document's stored file
+      description: Serves the file inline with its original mime type (thumbnails and the "View" link).
+      operationId: getDocumentFile
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: The file
+          headers:
+            Content-Disposition:
+              schema: { type: string }
+              description: "inline; filename*=UTF-8''<original_filename>"
+          content:
+            image/*:
+              schema: { type: string, format: binary }
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
   /api/v1/cases/{case_id}/documents/{document_id}/classify:
     post:
       tags: [Documents]
@@ -603,7 +627,7 @@ components:
         required_document_type_mismatch, cannot_confirm_unmatched_document,
         missing_override_status, invalid_override_status.
         404: case_not_found, act_type_not_found, document_not_found,
-        required_document_type_not_found.
+        document_file_not_found, required_document_type_not_found.
         500: internal_error.
       properties:
         error:

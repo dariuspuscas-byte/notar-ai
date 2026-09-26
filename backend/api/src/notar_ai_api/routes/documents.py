@@ -1,11 +1,14 @@
 from dataclasses import asdict
 from typing import Any
 
-from fastapi import APIRouter, Request
+from urllib.parse import quote
+
+from fastapi import APIRouter, Request, Response
 from notar_ai_core import (
     AppError,
     UploadDocumentInput,
     classify_document,
+    get_document_file,
     list_documents,
     review_classification,
     upload_document_and_classify,
@@ -68,6 +71,22 @@ async def get_documents(case_id: str) -> Any:
     """GET /api/v1/cases/{caseId}/documents — spec §3.3"""
     items = await list_documents(case_id)
     return {"items": items}
+
+
+@router.get("/cases/{case_id}/documents/{document_id}/file", response_model=None)
+async def get_file(case_id: str, document_id: str) -> Response:
+    """GET /api/v1/cases/{caseId}/documents/{documentId}/file — serves the stored
+    file inline (thumbnails / "View" link in the case view)."""
+    file = await get_document_file(case_id, document_id)
+    return Response(
+        content=file.data,
+        media_type=file.mime_type,
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{quote(file.original_filename)}",
+            "Cache-Control": "private, max-age=3600",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 @router.post("/cases/{case_id}/documents/{document_id}/classify", response_model=None)

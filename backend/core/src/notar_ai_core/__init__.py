@@ -35,6 +35,8 @@ from .documents import (
     upload_document,
     list_documents,
     get_document_buffer,
+    get_document_file,
+    DocumentFile,
     get_document_or_throw,
     UploadDocumentInput,
 )
@@ -79,6 +81,8 @@ __all__ = [
     "upload_document",
     "list_documents",
     "get_document_buffer",
+    "get_document_file",
+    "DocumentFile",
     "get_document_or_throw",
     "UploadDocumentInput",
     "classify_document",
