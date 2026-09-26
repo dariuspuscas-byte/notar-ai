@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { OverallStatus } from '../types/api'
 import { AlertTriangleIcon, CheckCircleIcon, MessageIcon } from './icons'
 
@@ -10,10 +11,6 @@ interface StatusBannerProps {
   markSignedDisabled?: boolean
 }
 
-function pluralDocs(count: number): string {
-  return count === 1 ? 'missing document' : 'missing documents'
-}
-
 export function StatusBanner({
   overallStatus,
   missingCount,
@@ -22,6 +19,8 @@ export function StatusBanner({
   onMarkSigned,
   markSignedDisabled,
 }: StatusBannerProps) {
+  const { t } = useTranslation()
+
   if (overallStatus === 'ready_to_sign') {
     return (
       <div className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -29,10 +28,10 @@ export function StatusBanner({
           <CheckCircleIcon className="h-[22px] w-[22px] flex-shrink-0 text-emerald-700" />
           <div className="flex flex-col gap-0.5">
             <span className="text-[15px] font-bold text-emerald-900">
-              Case complete · ready to sign
+              {t('statusBanner.readyTitle')}
             </span>
             <span className="text-[13px] text-emerald-700">
-              All documents have been received and confirmed
+              {t('statusBanner.readySubtitle')}
             </span>
           </div>
         </div>
@@ -43,7 +42,7 @@ export function StatusBanner({
           className="flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-700 px-[18px] py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50 lg:w-auto"
         >
           <CheckCircleIcon className="h-4 w-4" />
-          Mark case as signed
+          {t('statusBanner.markSigned')}
         </button>
       </div>
     )
@@ -51,15 +50,15 @@ export function StatusBanner({
 
   const primaryLine =
     missingCount > 0
-      ? `${missingCount} ${pluralDocs(missingCount)}`
-      : `${pendingReviewCount} ${pendingReviewCount === 1 ? 'document' : 'documents'} awaiting confirmation`
+      ? t('statusBanner.missingDocuments', { count: missingCount })
+      : t('statusBanner.awaitingConfirmation', { count: pendingReviewCount })
 
   const secondaryLine =
     missingCount > 0 && pendingReviewCount > 0
-      ? `+ ${pendingReviewCount} under review · the case cannot be signed yet`
+      ? t('statusBanner.underReviewCannotSign', { count: pendingReviewCount })
       : missingCount > 0
-        ? 'the case cannot be signed yet'
-        : 'the case cannot be signed yet, awaiting confirmation'
+        ? t('statusBanner.cannotSign')
+        : t('statusBanner.cannotSignAwaiting')
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -77,7 +76,7 @@ export function StatusBanner({
           className="flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-amber-700 px-[18px] py-2.5 text-sm font-semibold text-white hover:bg-amber-800 lg:w-auto"
         >
           <MessageIcon className="h-4 w-4" />
-          Generate message for client
+          {t('statusBanner.generateMessage')}
         </button>
       )}
     </div>

@@ -1,0 +1,130 @@
+{
+  "common": {
+    "appTitle": "Case Register",
+    "allCases": "All cases",
+    "newClient": "New client",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "reject": "Reject"
+  },
+  "format": {
+    "dateLocale": "en-GB",
+    "justNow": "just now",
+    "secondsAgo": "{{count}} sec ago",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} h ago",
+    "daysAgo": "{{count}} days ago",
+    "bytes": "{{value}} B",
+    "kilobytes": "{{value}} KB",
+    "megabytes": "{{value}} MB"
+  },
+  "caseList": {
+    "activeCases": "Active cases ({{count}})",
+    "searchPlaceholder": "Search by client name...",
+    "newCase": "+ New case",
+    "loading": "Loading cases...",
+    "noMatches": "No case matches your search.",
+    "empty": "No cases opened yet.",
+    "meta": "{{actType}} · updated {{date}}",
+    "status": {
+      "ready_to_sign": "Ready to sign",
+      "missing_documents": "Missing documents",
+      "pending_review": "Under review"
+    }
+  },
+  "actTypePicker": {
+    "title": "New case — choose the act type",
+    "subtitle": "The list of required documents is generated automatically based on the act type.",
+    "loading": "Loading act types...",
+    "loadError": "Could not load act types. Check your connection and try again.",
+    "createError": "Could not create the case. Please try again.",
+    "descriptorFallback": "Specific document list",
+    "descriptors": {
+      "sale_purchase": "Real estate property transfer",
+      "succession": "Succession proceedings",
+      "donation": "Transfer free of charge",
+      "mortgage": "Real estate collateral",
+      "power_of_attorney": "Notarial power of attorney",
+      "other": "Custom document list"
+    }
+  },
+  "caseView": {
+    "saving": "Saving...",
+    "saveError": "Could not save the changes. Please try again.",
+    "notFound": "Case not found. It may have been deleted, or the link is wrong.",
+    "loading": "Loading case...",
+    "requiredDocuments": "Required documents for {{actType}}",
+    "revalidate": "Revalidate",
+    "uploadFailed": "Upload failed",
+    "savedAsDraft": "Case “{{clientName}}” was saved as a draft."
+  },
+  "caseHeader": {
+    "clickToRename": "Click to rename",
+    "meta": "Case #{{id}} · opened {{date}}"
+  },
+  "statusBanner": {
+    "readyTitle": "Case complete · ready to sign",
+    "readySubtitle": "All documents have been received and confirmed",
+    "markSigned": "Mark case as signed",
+    "missingDocuments_one": "{{count}} missing document",
+    "missingDocuments_other": "{{count}} missing documents",
+    "awaitingConfirmation_one": "{{count}} document awaiting confirmation",
+    "awaitingConfirmation_other": "{{count}} documents awaiting confirmation",
+    "underReviewCannotSign": "+ {{count}} under review · the case cannot be signed yet",
+    "cannotSign": "the case cannot be signed yet",
+    "cannotSignAwaiting": "the case cannot be signed yet, awaiting confirmation",
+    "generateMessage": "Generate message for client"
+  },
+  "checklist": {
+    "optional": "(optional)",
+    "moreActions": "More actions",
+    "markReceived": "Mark as received manually",
+    "markNotApplicable": "Mark as N/A",
+    "notePlaceholder": "Note (optional)",
+    "markedNotRequired": "Marked as not required",
+    "notApplicable": "N/A",
+    "restore": "Restore",
+    "received": "Received",
+    "receivedManually": "Received · confirmed manually",
+    "receivedAutomatically": "Received · recognized automatically",
+    "view": "View",
+    "toConfirm": "To confirm",
+    "suggestion": "The system thinks this is the document · confidence {{confidence}}",
+    "chooseAnother": "Choose another document",
+    "noOtherDocument": "No other document available.",
+    "rejectReasonPlaceholder": "Reason (e.g. blurry photo)",
+    "notUploaded": "Not uploaded",
+    "missing": "Missing",
+    "upload": "Upload"
+  },
+  "inFlightUpload": {
+    "verifyingDetail": "File received {{seconds}}s ago · verifying",
+    "verifying": "Verifying"
+  },
+  "unrecognizedFiles": {
+    "title": "Unrecognized files ({{count}})",
+    "classificationFailed": "classification failed",
+    "noMatch": "does not match any document in the list",
+    "retry": "Retry",
+    "assign": "Assign"
+  },
+  "uploadDropzone": {
+    "prompt": "Drag files here or <link>click to upload</link>",
+    "defaultHint": "no need to pick the type, the system recognizes the document"
+  },
+  "generateMessage": {
+    "title": "Message for client",
+    "sendWhatsApp": "Send via WhatsApp",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "toast": {
+    "dismiss": "Dismiss notification"
+  },
+  "clientMessage": {
+    "bullet": "— {{name}}",
+    "body": "Hello, for your case ({{actType}}) we still need the following documents:\n{{list}}\nPlease send them to the office or to this number. Thank you!"
+  }
+}

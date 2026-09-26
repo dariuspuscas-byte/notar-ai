@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Case } from '../types/api'
 import { formatDate } from '../lib/format'
+import { DEFAULT_CLIENT_NAME } from '../api/cases'
 
 interface CaseHeaderProps {
   theCase: Case
@@ -12,6 +14,7 @@ interface CaseHeaderProps {
 }
 
 export function CaseHeader({ theCase, actTypeName, onRename, onDraftChange }: CaseHeaderProps) {
+  const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(theCase.client_name)
 
@@ -23,7 +26,7 @@ export function CaseHeader({ theCase, actTypeName, onRename, onDraftChange }: Ca
             className="flex items-center gap-2"
             onSubmit={(e) => {
               e.preventDefault()
-              onRename(name.trim() || 'New client')
+              onRename(name.trim() || DEFAULT_CLIENT_NAME)
               setEditing(false)
               onDraftChange?.(null)
             }}
@@ -38,17 +41,17 @@ export function CaseHeader({ theCase, actTypeName, onRename, onDraftChange }: Ca
               className="rounded border border-gray-300 px-2 py-1 text-xl font-bold"
             />
             <button type="submit" className="text-sm font-semibold text-blue-700">
-              Save
+              {t('common.save')}
             </button>
           </form>
         ) : (
           <div className="flex flex-wrap items-center gap-2.5">
             <h1
               className="cursor-pointer text-[22px] font-bold text-gray-900"
-              title="Click to rename"
+              title={t('caseHeader.clickToRename')}
               onClick={() => setEditing(true)}
             >
-              {theCase.client_name || 'New client'}
+              {theCase.client_name || t('common.newClient')}
             </h1>
             <span className="rounded px-2.5 py-1 text-xs font-semibold text-blue-700" style={{ background: '#E9F0FB' }}>
               {actTypeName}
@@ -56,7 +59,7 @@ export function CaseHeader({ theCase, actTypeName, onRename, onDraftChange }: Ca
           </div>
         )}
         <span className="text-[13px] text-gray-500">
-          Case #{theCase.id.slice(0, 8)} · opened {formatDate(theCase.created_at)}
+          {t('caseHeader.meta', { id: theCase.id.slice(0, 8), date: formatDate(theCase.created_at) })}
         </span>
       </div>
     </div>

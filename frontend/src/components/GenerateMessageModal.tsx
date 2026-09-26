@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CopyIcon, XIcon } from './icons'
 
 interface GenerateMessageModalProps {
@@ -9,6 +10,7 @@ interface GenerateMessageModalProps {
 /** Parent only mounts this while the modal should be open (see CaseViewPage),
  * so state can initialize straight from props — no reset effect needed. */
 export function GenerateMessageModal({ initialText, onClose }: GenerateMessageModalProps) {
+  const { t } = useTranslation()
   const [text, setText] = useState(initialText)
   const [copied, setCopied] = useState(false)
 
@@ -24,10 +26,10 @@ export function GenerateMessageModal({ initialText, onClose }: GenerateMessageMo
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Message for client</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t('generateMessage.title')}</h2>
           <button
             type="button"
-            aria-label="Close"
+            aria-label={t('common.close')}
             onClick={onClose}
             className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
@@ -47,7 +49,7 @@ export function GenerateMessageModal({ initialText, onClose }: GenerateMessageMo
             rel="noreferrer"
             className="flex min-h-11 items-center justify-center rounded-md border border-gray-300 px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50"
           >
-            Send via WhatsApp
+            {t('generateMessage.sendWhatsApp')}
           </a>
           <button
             type="button"
@@ -58,7 +60,7 @@ export function GenerateMessageModal({ initialText, onClose }: GenerateMessageMo
             className="flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-700 px-4 text-sm font-semibold text-white hover:bg-blue-800"
           >
             <CopyIcon className="h-4 w-4" />
-            {copied ? 'Copied!' : 'Copy'}
+            {copied ? t('generateMessage.copied') : t('generateMessage.copy')}
           </button>
         </div>
       </div>
