@@ -1,3 +1,5 @@
+import i18n from '../i18n'
+
 /**
  * Drafts the "generate client message" text — UX_SPEC.md §4.
  * Uses ONLY the current Missing rows, never Verifying/Needs-review ones:
@@ -5,6 +7,8 @@
  * confusingly ask the client to resend something they already sent.
  */
 export function generateClientMessage(actTypeName: string, missingItemNames: string[]): string {
-  const bulletList = missingItemNames.map((name) => `— ${name}`).join('\n')
-  return `Hello, for your case (${actTypeName.toLowerCase()}) we still need the following documents:\n${bulletList}\nPlease send them to the office or to this number. Thank you!`
+  const bulletList = missingItemNames
+    .map((name) => i18n.t('clientMessage.bullet', { name }))
+    .join('\n')
+  return i18n.t('clientMessage.body', { actType: actTypeName.toLowerCase(), list: bulletList })
 }

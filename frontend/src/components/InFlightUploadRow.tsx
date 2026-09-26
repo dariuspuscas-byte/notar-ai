@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SpinnerIcon } from './icons'
 import { StatusPill } from './StatusPill'
 
@@ -21,6 +22,7 @@ interface InFlightUploadRowProps {
  * lands and the real checklist/document queries refetch.
  */
 export function InFlightUploadRow({ filenames, startedAt, error, onDismiss }: InFlightUploadRowProps) {
+  const { t } = useTranslation()
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000)
@@ -45,7 +47,7 @@ export function InFlightUploadRow({ filenames, startedAt, error, onDismiss }: In
             onClick={onDismiss}
             className="text-[13px] font-semibold text-red-700 hover:text-red-900"
           >
-            Close
+            {t('common.close')}
           </button>
         )}
       </div>
@@ -59,10 +61,10 @@ export function InFlightUploadRow({ filenames, startedAt, error, onDismiss }: In
       </div>
       <div className="flex flex-1 flex-col gap-0.5">
         <span className="text-[15px] font-semibold text-gray-900">{filenames.join(', ')}</span>
-        <span className="text-[13px] text-gray-500">File received {elapsedSec}s ago · verifying</span>
+        <span className="text-[13px] text-gray-500">{t('inFlightUpload.verifyingDetail', { seconds: elapsedSec })}</span>
       </div>
       <StatusPill tone="blue">
-        <SpinnerIcon className="h-3 w-3" /> Verifying
+        <SpinnerIcon className="h-3 w-3" /> {t('inFlightUpload.verifying')}
       </StatusPill>
     </div>
   )

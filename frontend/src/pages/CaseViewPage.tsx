@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { CaseListLocationState } from './CaseListPage'
 import { useActTypes } from '../api/actTypes'
-import { useCase, useCaseStatus, useUpdateCase, useValidateCase } from '../api/cases'
+import {
+  DEFAULT_CLIENT_NAME,
+  useCase,
+  useCaseStatus,
+  useUpdateCase,
+  useValidateCase,
+} from '../api/cases'
 import {
   useClassifyDocument,
   useDocuments,
@@ -22,6 +29,10 @@ import { getDocumentFileUrl } from '../lib/documentFile'
 import { generateClientMessage } from '../lib/messageTemplate'
 import type { Document } from '../types/api'
 
+// Stored with the review in the database (not shown in the UI), so it is kept
+// as a fixed string rather than following the UI language.
+const UNRECOGNIZED_REJECT_NOTE = 'Unrecognized document, rejected by assistant'
+
 interface InFlightUpload {
   id: string
   filenames: string[]
@@ -30,6 +41,7 @@ interface InFlightUpload {
 }
 
 export default function CaseViewPage() {
+  const { t } = useTranslation()
   const { caseId } = useParams<{ caseId: string }>()
   const navigate = useNavigate()
 
@@ -96,7 +108,7 @@ export default function CaseViewPage() {
         setInFlight((prev) =>
           prev.map((e) =>
             e.id === entryId
-              ? { ...e, error: err instanceof Error ? err.message : 'Upload failed' }
+              ? { ...e, error: err instanceof Error ? err.message : t('caseView.uploadFailed') }
               : e,
           ),
         )
@@ -125,7 +137,7 @@ export default function CaseViewPage() {
   )
   const caseHasContent =
     hasPendingRename ||
-    (!!theCase && theCase.client_name.trim() !== '' && theCase.client_name !== 'New client') ||
+    (!!theCase && theCase.client_name.trim() !== '' && theCase.client_name !== DEFAULT_CLIENT_NAME) ||
     !!theCase?.notes ||
     (documents?.length ?? 0) > 0 ||
     hasManualOverride
@@ -136,7 +148,9 @@ export default function CaseViewPage() {
     const clientName = hasPendingRename ? pendingName : theCase?.client_name
     const leave = () =>
       navigate('/', {
-        state: { toast: `Case “${clientName}” was saved as a draft.` } satisfies CaseListLocationState,
+        state: {
+          toast: t('caseView.savedAsDraft', { clientName }),
+        } satisfies CaseListLocationState,
       })
     if (!hasPendingRename) {
       leave()
@@ -154,7 +168,7 @@ export default function CaseViewPage() {
           className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700"
         >
           <ChevronLeftIcon className="h-4 w-4" />
-          All cases
+          {t('common.allCases')}
         </button>
         {theCase && (
           <button
@@ -163,7 +177,7 @@ export default function CaseViewPage() {
             disabled={!caseHasContent || updateCaseMutation.isPending}
             className="flex min-h-10 items-center rounded-md bg-blue-700 px-4 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {updateCaseMutation.isPending ? 'Saving...' : 'Save'}
+            {updateCaseMutation.isPending ? t('caseView.saving') : t('common.save')}
           </button>
         )}
       </div>
@@ -173,17 +187,17 @@ export default function CaseViewPage() {
           role="alert"
           className="border-b border-red-200 bg-red-50 px-6 py-3 text-sm text-red-700 sm:px-12"
         >
-          Could not save the changes. Please try again.
+          {t('caseView.saveError')}
         </div>
       )}
 
       {caseNotFound && (
         <p className="px-6 py-10 text-sm text-red-600 sm:px-12">
-          Case not found. It may have been deleted, or the link is wrong.
+          {t('caseView.notFound')}
         </p>
       )}
       {!theCase && !caseNotFound && (
-        <p className="px-6 py-10 text-sm text-gray-500 sm:px-12">Loading case...</p>
+        <p className="px-6 py-10 text-sm text-gray-500 sm:px-12">{t('caseView.loading')}</p>
       )}
 
       {theCase && (
@@ -230,7 +244,7 @@ export default function CaseViewPage() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  Required documents for {actTypeName.toLowerCase()}
+                  {t('caseView.requiredDocuments', { actType: actTypeName.toLowerCase() })}
                 </span>
                 <button
                   type="button"
@@ -238,7 +252,7 @@ export default function CaseViewPage() {
                   disabled={validateMutation.isPending}
                   className="text-xs font-semibold text-blue-700 hover:text-blue-900 disabled:opacity-50"
                 >
-                  Revalidate
+                  {t('caseView.revalidate')}
                 </button>
               </div>
 
@@ -306,7 +320,7 @@ export default function CaseViewPage() {
               onDiscard={(documentId) =>
                 reviewMutation.mutate({
                   documentId,
-                  body: { decision: 'reject', note: 'Unrecognized document, rejected by assistant' },
+                  body: { decision: 'reject', note: UNRECOGNIZED_REJECT_NOTE },
                 })
               }
               onRetryClassification={(documentId) => classifyMutation.mutate(documentId)}

@@ -1,17 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useActTypes } from '../api/actTypes'
 import { useCases } from '../api/cases'
 import { StatusPill, type PillTone } from '../components/StatusPill'
 import { Toast } from '../components/Toast'
 import type { OverallStatus } from '../types/api'
 import { formatDate } from '../lib/format'
-
-const STATUS_LABEL: Record<OverallStatus, string> = {
-  ready_to_sign: 'Ready to sign',
-  missing_documents: 'Missing documents',
-  pending_review: 'Under review',
-}
 
 const STATUS_TONE: Record<OverallStatus, PillTone> = {
   ready_to_sign: 'green',
@@ -25,6 +20,7 @@ export interface CaseListLocationState {
 }
 
 export default function CaseListPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const [toast, setToast] = useState(
@@ -58,9 +54,9 @@ export default function CaseListPage() {
   return (
     <div className="min-h-screen bg-[#F7F8FA]">
       <div className="flex h-[60px] items-center justify-between border-b border-gray-200 bg-white px-6 sm:px-12">
-        <span className="text-[15px] font-bold text-gray-900">Case Register</span>
+        <span className="text-[15px] font-bold text-gray-900">{t('common.appTitle')}</span>
         <span className="text-sm text-gray-500">
-          Active cases ({cases?.length ?? 0})
+          {t('caseList.activeCases', { count: cases?.length ?? 0 })}
         </span>
       </div>
 
@@ -70,7 +66,7 @@ export default function CaseListPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by client name..."
+            placeholder={t('caseList.searchPlaceholder')}
             className="min-h-11 flex-1 rounded-md border border-gray-300 px-3.5 text-sm focus:border-blue-500 focus:outline-none sm:max-w-sm"
           />
           <button
@@ -78,15 +74,15 @@ export default function CaseListPage() {
             onClick={() => navigate('/new')}
             className="flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-700 px-4.5 text-sm font-semibold text-white hover:bg-blue-800"
           >
-            + New case
+            {t('caseList.newCase')}
           </button>
         </div>
 
         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-          {isLoading && <p className="p-6 text-sm text-gray-500">Loading cases...</p>}
+          {isLoading && <p className="p-6 text-sm text-gray-500">{t('caseList.loading')}</p>}
           {!isLoading && filtered.length === 0 && (
             <p className="p-6 text-sm text-gray-500">
-              {search ? 'No case matches your search.' : 'No cases opened yet.'}
+              {search ? t('caseList.noMatches') : t('caseList.empty')}
             </p>
           )}
           {filtered.map((c) => (
@@ -98,13 +94,16 @@ export default function CaseListPage() {
             >
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="truncate text-[15px] font-semibold text-gray-900">
-                  {c.client_name || 'New client'}
+                  {c.client_name || t('common.newClient')}
                 </span>
                 <span className="text-[13px] text-gray-500">
-                  {actTypeNameById.get(c.act_type_id) ?? '—'} · updated {formatDate(c.updated_at)}
+                  {t('caseList.meta', {
+                    actType: actTypeNameById.get(c.act_type_id) ?? '—',
+                    date: formatDate(c.updated_at),
+                  })}
                 </span>
               </div>
-              <StatusPill tone={STATUS_TONE[c.status]}>{STATUS_LABEL[c.status]}</StatusPill>
+              <StatusPill tone={STATUS_TONE[c.status]}>{t(`caseList.status.${c.status}`)}</StatusPill>
             </button>
           ))}
         </div>

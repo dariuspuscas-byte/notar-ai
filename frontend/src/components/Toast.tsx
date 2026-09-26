@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CheckCircleIcon, XIcon } from './icons'
 
 interface ToastProps {
@@ -11,6 +12,8 @@ interface ToastProps {
  * always mounted (only its content toggles) so screen readers reliably
  * announce the message when it appears. */
 export function Toast({ message, onDismiss, durationMs = 5000 }: ToastProps) {
+  const { t } = useTranslation()
+
   useEffect(() => {
     if (!message) return
     const id = setTimeout(onDismiss, durationMs)
@@ -29,7 +32,7 @@ export function Toast({ message, onDismiss, durationMs = 5000 }: ToastProps) {
           <span className="flex-1 text-sm font-semibold text-emerald-900">{message}</span>
           <button
             type="button"
-            aria-label="Dismiss notification"
+            aria-label={t('toast.dismiss')}
             onClick={onDismiss}
             className="rounded p-1 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
           >

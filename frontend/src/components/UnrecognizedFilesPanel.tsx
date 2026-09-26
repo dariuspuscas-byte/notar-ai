@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Document } from '../types/api'
 import { formatFileSize, formatRelativeTime } from '../lib/format'
 import { AlertTriangleIcon, ChevronLeftIcon, ImageIcon } from './icons'
@@ -31,6 +32,7 @@ function UnrecognizedRow({
   onRetryClassification: (documentId: string) => void
   busy?: boolean
 }) {
+  const { t } = useTranslation()
   const [showAssign, setShowAssign] = useState(false)
   const isError = doc.status === 'pending_classification'
 
@@ -47,8 +49,9 @@ function UnrecognizedRow({
         <span className="truncate text-sm font-medium text-gray-800">{doc.original_filename}</span>
         <span className={`text-xs ${isError ? 'text-red-600' : 'text-gray-500'}`}>
           {formatFileSize(doc.file_size_bytes)} · {formatRelativeTime(doc.uploaded_at)}
-          {isError && (doc.classification_error ? ` · ${doc.classification_error}` : ' · classification failed')}
-          {!isError && ' · does not match any document in the list'}
+          {isError &&
+            ` · ${doc.classification_error ? doc.classification_error : t('unrecognizedFiles.classificationFailed')}`}
+          {!isError && ` · ${t('unrecognizedFiles.noMatch')}`}
         </span>
       </div>
       {isError ? (
@@ -58,7 +61,7 @@ function UnrecognizedRow({
           onClick={() => onRetryClassification(doc.id)}
           className="flex-shrink-0 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
-          Retry
+          {t('unrecognizedFiles.retry')}
         </button>
       ) : (
         <div className="relative flex-shrink-0">
@@ -68,7 +71,7 @@ function UnrecognizedRow({
             onClick={() => setShowAssign((s) => !s)}
             className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
-            Assign
+            {t('unrecognizedFiles.assign')}
           </button>
           {showAssign && (
             <div className="absolute right-0 top-9 z-10 max-h-64 w-64 overflow-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
@@ -95,7 +98,7 @@ function UnrecognizedRow({
         onClick={() => onDiscard(doc.id)}
         className="flex-shrink-0 text-xs font-semibold text-gray-400 hover:text-gray-600 disabled:opacity-50"
       >
-        Reject
+        {t('common.reject')}
       </button>
     </div>
   )
@@ -110,6 +113,7 @@ export function UnrecognizedFilesPanel({
   onRetryClassification,
   busy,
 }: UnrecognizedFilesPanelProps) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   if (documents.length === 0) return null
 
@@ -126,7 +130,7 @@ export function UnrecognizedFilesPanel({
           className={`h-4 w-4 flex-shrink-0 ${hasError ? 'text-red-500' : 'text-gray-400'}`}
         />
         <span className="flex-1 text-sm font-semibold text-gray-700">
-          Unrecognized files ({documents.length})
+          {t('unrecognizedFiles.title', { count: documents.length })}
         </span>
         <ChevronLeftIcon className={`h-4 w-4 text-gray-400 transition-transform ${open ? '-rotate-90' : 'rotate-180'}`} />
       </button>

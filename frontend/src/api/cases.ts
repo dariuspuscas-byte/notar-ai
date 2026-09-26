@@ -2,6 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiPatch, apiPost } from './client'
 import type { Case, CaseStatusResponse, CreateCaseRequest, UpdateCaseRequest } from '../types/api'
 
+/** Placeholder client name stored on new cases. It is persisted data (and
+ * compared against to detect an untouched case), so it is not localized —
+ * the UI shows `common.newClient` instead when a name is empty. */
+export const DEFAULT_CLIENT_NAME = 'New client'
+
 export function useCases(status?: Case['status']) {
   return useQuery({
     queryKey: ['cases', { status }],

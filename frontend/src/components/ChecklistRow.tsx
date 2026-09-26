@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CaseStatusChecklistItem, Document } from '../types/api'
 import { formatConfidencePct } from '../lib/format'
 import { StatusPill } from './StatusPill'
@@ -9,6 +10,10 @@ import {
   NotApplicableIcon,
   UploadArrowIcon,
 } from './icons'
+
+// Stored with the review in the database (not shown in the UI), so it is kept
+// as a fixed string rather than following the UI language.
+const DEFAULT_REJECT_NOTE = 'Rejected by assistant'
 
 export interface ReassignOption {
   id: string
@@ -37,6 +42,7 @@ function KebabMenu({
   onMarkReceived: (note: string) => void
   onMarkNotApplicable: (note: string) => void
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [prompt, setPrompt] = useState<'received' | 'not_applicable' | null>(null)
   const [note, setNote] = useState('')
@@ -45,13 +51,13 @@ function KebabMenu({
     return (
       <div className="absolute right-0 top-9 z-10 w-64 rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
         <p className="mb-2 text-xs font-semibold text-gray-700">
-          {prompt === 'received' ? 'Mark as received manually' : 'Mark as N/A'}
+          {prompt === 'received' ? t('checklist.markReceived') : t('checklist.markNotApplicable')}
         </p>
         <input
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Note (optional)"
+          placeholder={t('checklist.notePlaceholder')}
           className="mb-2 w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
         />
         <div className="flex justify-end gap-2">
@@ -64,7 +70,7 @@ function KebabMenu({
             }}
             className="rounded px-2 py-1 text-xs font-semibold text-gray-500 hover:bg-gray-100"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -77,7 +83,7 @@ function KebabMenu({
             }}
             className="rounded bg-blue-700 px-2.5 py-1 text-xs font-semibold text-white hover:bg-blue-800"
           >
-            Confirm
+            {t('common.confirm')}
           </button>
         </div>
       </div>
@@ -88,7 +94,7 @@ function KebabMenu({
     <div className="relative">
       <button
         type="button"
-        aria-label="More actions"
+        aria-label={t('checklist.moreActions')}
         onClick={() => setOpen((o) => !o)}
         className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600"
       >
@@ -101,14 +107,14 @@ function KebabMenu({
             onClick={() => setPrompt('received')}
             className="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
           >
-            Mark as received manually
+            {t('checklist.markReceived')}
           </button>
           <button
             type="button"
             onClick={() => setPrompt('not_applicable')}
             className="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
           >
-            Mark as N/A
+            {t('checklist.markNotApplicable')}
           </button>
         </div>
       )}
@@ -130,13 +136,14 @@ export function ChecklistRow({
   onMarkNotApplicable,
   onBringBack,
 }: ChecklistRowProps) {
+  const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showReassign, setShowReassign] = useState(false)
   const [showRejectNote, setShowRejectNote] = useState(false)
   const [rejectNote, setRejectNote] = useState('')
 
   const mandatoryHint = !item.is_mandatory ? (
-    <span className="text-gray-400"> (optional)</span>
+    <span className="text-gray-400"> {t('checklist.optional')}</span>
   ) : null
 
   if (item.status === 'not_applicable') {
@@ -150,17 +157,17 @@ export function ChecklistRow({
             {item.name}
             {mandatoryHint}
           </span>
-          <span className="text-[13px] text-gray-400">Marked as not required</span>
+          <span className="text-[13px] text-gray-400">{t('checklist.markedNotRequired')}</span>
         </div>
         <StatusPill tone="dim">
-          <NotApplicableIcon className="h-3 w-3" /> N/A
+          <NotApplicableIcon className="h-3 w-3" /> {t('checklist.notApplicable')}
         </StatusPill>
         <button
           type="button"
           onClick={onBringBack}
           className="w-[84px] text-right text-[13px] font-semibold text-gray-400 hover:text-gray-600"
         >
-          Restore
+          {t('checklist.restore')}
         </button>
       </div>
     )
@@ -178,13 +185,14 @@ export function ChecklistRow({
             {mandatoryHint}
           </span>
           <span className="text-[13px] text-gray-500">
-            Received
-            {document?.status === 'confirmed' ? ' · confirmed manually' : ' · recognized automatically'}
+            {document?.status === 'confirmed'
+              ? t('checklist.receivedManually')
+              : t('checklist.receivedAutomatically')}
             {typeof item.confidence === 'number' ? ` (${formatConfidencePct(item.confidence)})` : ''}
           </span>
         </div>
         <StatusPill tone="green">
-          <CheckIcon className="h-3 w-3" /> Received
+          <CheckIcon className="h-3 w-3" /> {t('checklist.received')}
         </StatusPill>
         {fileUrl ? (
           <a
@@ -193,7 +201,7 @@ export function ChecklistRow({
             rel="noreferrer"
             className="w-[84px] text-right text-[13px] font-semibold text-blue-700 hover:text-blue-900"
           >
-            View
+            {t('checklist.view')}
           </a>
         ) : (
           <span className="w-[84px]" />
@@ -216,7 +224,7 @@ export function ChecklistRow({
                 {item.name}
                 {mandatoryHint}
               </span>
-              <StatusPill tone="amber">To confirm</StatusPill>
+              <StatusPill tone="amber">{t('checklist.toConfirm')}</StatusPill>
             </div>
             <div className="flex items-center gap-2.5">
               {fileUrl ? (
@@ -236,7 +244,7 @@ export function ChecklistRow({
                 </div>
               )}
               <span className="text-[13px] text-amber-800">
-                The system thinks this is the document · confidence {formatConfidencePct(item.confidence)}
+                {t('checklist.suggestion', { confidence: formatConfidencePct(item.confidence) })}
                 {document ? ` · ${document.original_filename}` : ''}
               </span>
             </div>
@@ -250,7 +258,7 @@ export function ChecklistRow({
             onClick={() => document && onConfirm(document.id)}
             className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-md bg-amber-600 px-3.5 py-1.5 text-[13px] font-semibold text-white hover:bg-amber-700 disabled:opacity-50 lg:min-h-0 lg:flex-none"
           >
-            <CheckIcon className="h-3.5 w-3.5" /> Confirm
+            <CheckIcon className="h-3.5 w-3.5" /> {t('common.confirm')}
           </button>
           <div className="relative flex-1 lg:flex-none">
             <button
@@ -259,12 +267,12 @@ export function ChecklistRow({
               onClick={() => setShowReassign((s) => !s)}
               className="min-h-11 w-full rounded-md border border-amber-300 px-3 py-1.5 text-[13px] font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50 lg:min-h-0 lg:w-auto"
             >
-              Choose another document
+              {t('checklist.chooseAnother')}
             </button>
             {showReassign && (
               <div className="absolute left-0 top-9 z-10 max-h-64 w-72 overflow-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
                 {reassignOptions.length === 0 && (
-                  <p className="px-3 py-2 text-sm text-gray-500">No other document available.</p>
+                  <p className="px-3 py-2 text-sm text-gray-500">{t('checklist.noOtherDocument')}</p>
                 )}
                 {reassignOptions.map((opt) => (
                   <button
@@ -289,7 +297,7 @@ export function ChecklistRow({
               onClick={() => setShowRejectNote(true)}
               className="text-[13px] font-semibold text-gray-500 underline decoration-dotted hover:text-gray-700"
             >
-              Reject
+              {t('common.reject')}
             </button>
           ) : (
             <div className="flex items-center gap-2">
@@ -298,19 +306,19 @@ export function ChecklistRow({
                 type="text"
                 value={rejectNote}
                 onChange={(e) => setRejectNote(e.target.value)}
-                placeholder="Reason (e.g. blurry photo)"
+                placeholder={t('checklist.rejectReasonPlaceholder')}
                 className="rounded border border-gray-300 px-2 py-1 text-[13px]"
               />
               <button
                 type="button"
                 onClick={() => {
-                  if (document) onReject(document.id, rejectNote || 'Rejected by assistant')
+                  if (document) onReject(document.id, rejectNote || DEFAULT_REJECT_NOTE)
                   setShowRejectNote(false)
                   setRejectNote('')
                 }}
                 className="rounded bg-gray-700 px-2.5 py-1 text-[13px] font-semibold text-white hover:bg-gray-800"
               >
-                Confirm
+                {t('common.confirm')}
               </button>
             </div>
           )}
@@ -330,9 +338,9 @@ export function ChecklistRow({
           {item.name}
           {mandatoryHint}
         </span>
-        <span className="text-[13px] text-gray-400">Not uploaded</span>
+        <span className="text-[13px] text-gray-400">{t('checklist.notUploaded')}</span>
       </div>
-      <StatusPill tone="grey">Missing</StatusPill>
+      <StatusPill tone="grey">{t('checklist.missing')}</StatusPill>
       <input
         ref={fileInputRef}
         type="file"
@@ -350,7 +358,7 @@ export function ChecklistRow({
         onClick={() => fileInputRef.current?.click()}
         className="min-h-11 w-[84px] flex-shrink-0 rounded-md border border-blue-200 bg-white px-3.5 py-1.5 text-[13px] font-semibold text-blue-700 hover:bg-blue-50 lg:min-h-0"
       >
-        Upload
+        {t('checklist.upload')}
       </button>
       <KebabMenu onMarkReceived={onMarkReceived} onMarkNotApplicable={onMarkNotApplicable} />
     </div>

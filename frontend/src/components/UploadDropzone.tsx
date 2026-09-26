@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { UploadArrowIcon } from './icons'
 
 interface UploadDropzoneProps {
@@ -7,6 +8,7 @@ interface UploadDropzoneProps {
 }
 
 export function UploadDropzone({ onFiles, helperText }: UploadDropzoneProps) {
+  const { t } = useTranslation()
   const [dragActive, setDragActive] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -39,8 +41,11 @@ export function UploadDropzone({ onFiles, helperText }: UploadDropzoneProps) {
     >
       <UploadArrowIcon className="h-5 w-5 flex-shrink-0 text-gray-500" />
       <span className="text-sm text-gray-500">
-        Drag files here or <span className="font-semibold text-blue-700">click to upload</span>
-        {helperText ? ` — ${helperText}` : ' — no need to pick the type, the system recognizes the document'}
+        <Trans
+          i18nKey="uploadDropzone.prompt"
+          components={{ link: <span className="font-semibold text-blue-700" /> }}
+        />
+        {` — ${helperText || t('uploadDropzone.defaultHint')}`}
       </span>
       <input
         ref={inputRef}
