@@ -5,3 +5,12 @@ specs.md
 .vscode/*
 .env.example
 specs/*
+
+# Pythong files
+**/__pycache__/**
+*.pyc
+.mypy_cache/
+*.egg-info/
+
+# Document files / Assets
+**/documents/*

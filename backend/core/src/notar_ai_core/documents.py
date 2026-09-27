@@ -98,3 +98,22 @@ async def list_documents(case_id: str) -> list[DocumentDTO]:
 async def get_document_buffer(document_id: str) -> bytes:
     row = await get_document_or_throw(document_id)
     return await storage.read(row.storage_path)
+
+
+@dataclass(frozen=True)
+class DocumentFile:
+    data: bytes
+    mime_type: str
+    original_filename: str
+
+
+async def get_document_file(case_id: str, document_id: str) -> DocumentFile:
+    """GET /api/v1/cases/{caseId}/documents/{documentId}/file"""
+    row = await get_document_or_throw(document_id)
+    if row.case_id != case_id:
+        raise AppError.not_found("document_not_found", f"Document {document_id} not found")
+    try:
+        data = await storage.read(row.storage_path)
+    except FileNotFoundError:
+        raise AppError.not_found("document_file_not_found", f"File for document {document_id} not found")
+    return DocumentFile(data=data, mime_type=row.mime_type, original_filename=row.original_filename)
