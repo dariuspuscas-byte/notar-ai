@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Document } from '../types/api'
 import { formatFileSize, formatRelativeTime } from '../lib/format'
+import { AnchoredPopover } from './AnchoredPopover'
 import { AlertTriangleIcon, ChevronLeftIcon, ImageIcon } from './icons'
 import type { ReassignOption } from './ChecklistRow'
 
@@ -34,6 +35,8 @@ function UnrecognizedRow({
 }) {
   const { t } = useTranslation()
   const [showAssign, setShowAssign] = useState(false)
+  const assignButtonRef = useRef<HTMLButtonElement>(null)
+  const closeAssign = useCallback(() => setShowAssign(false), [])
   const isError = doc.status === 'pending_classification'
 
   return (
@@ -64,17 +67,20 @@ function UnrecognizedRow({
           {t('unrecognizedFiles.retry')}
         </button>
       ) : (
-        <div className="relative flex-shrink-0">
+        <div className="flex-shrink-0">
           <button
+            ref={assignButtonRef}
             type="button"
             disabled={busy}
+            aria-haspopup="true"
+            aria-expanded={showAssign}
             onClick={() => setShowAssign((s) => !s)}
             className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
             {t('unrecognizedFiles.assign')}
           </button>
           {showAssign && (
-            <div className="absolute right-0 top-9 z-10 max-h-64 w-64 overflow-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+            <AnchoredPopover anchorRef={assignButtonRef} onClose={closeAssign} align="right" className="w-64">
               {reassignOptions.map((opt) => (
                 <button
                   key={opt.id}
@@ -88,7 +94,7 @@ function UnrecognizedRow({
                   {opt.name}
                 </button>
               ))}
-            </div>
+            </AnchoredPopover>
           )}
         </div>
       )}
