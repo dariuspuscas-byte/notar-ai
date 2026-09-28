@@ -1,0 +1,114 @@
+# Full notar-ai stack: Postgres + Ollama + backend (FastAPI) + frontend (nginx).
+#
+#   docker compose up -d --build
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build   # Linux + NVIDIA GPU
+#
+# Web UI:  http://localhost:${FRONTEND_PORT:-8080}
+# API:     http://localhost:${BACKEND_PORT:-3001}/api/v1  (health: /health)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: notarai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-notary_db}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    ports:
+      # Mapped host port is overridable (POSTGRES_PORT) in case you already
+      # have a local Postgres install bound to 5432.
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - notarai_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-notary_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Local LLM server for document classification (spec §4.2). Models are kept
+  # in a named volume, so they're downloaded once. CPU-only by default (see
+  # docker-compose.gpu.yml). Docker on macOS can't use the Apple GPU, so a
+  # native Ollama install is much faster there: set
+  # OLLAMA_BASE_URL=http://host.docker.internal:11434 in .env to use it.
+  ollama:
+    image: ollama/ollama:0.34.0
+    container_name: notarai-ollama
+    restart: unless-stopped
+    environment:
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
+    volumes:
+      - notarai_ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # One-shot job: pulls OLLAMA_MODEL into the ollama volume (quick no-op once
+  # it's there), then exits. The backend doesn't wait for it: a multi-GB
+  # download can be slow or fail, and the API should still come up. Until the
+  # model is present, classification fails and documents stay
+  # pending_classification (retryable from the UI).
+  ollama-pull:
+    image: ollama/ollama:0.34.0
+    container_name: notarai-ollama-pull
+    restart: "no"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["ollama", "pull", "${OLLAMA_MODEL:-llama3.2-vision:11b}"]
+
+  backend:
+    build:
+      context: ./backend
+    container_name: notarai-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@postgres:5432/${POSTGRES_DB:-notary_db}
+      DOCUMENTS_ROOT: /app/data/documents
+      PORT: 3000
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2-vision:11b}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
+      # CPU inference is slow; nginx allows 300s per API request.
+      OLLAMA_TIMEOUT_MS: ${OLLAMA_TIMEOUT_MS:-240000}
+      CLASSIFICATION_CONFIDENCE_THRESHOLD: ${CLASSIFICATION_CONFIDENCE_THRESHOLD:-0.85}
+    extra_hosts:
+      # Makes host.docker.internal resolve on Linux too (built in on Docker Desktop).
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${BACKEND_PORT:-3001}:3000"
+    volumes:
+      - notarai_documents:/app/data/documents
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: notarai-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+
+volumes:
+  notarai_postgres_data:
+  notarai_documents:
+  notarai_ollama_models:

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CaseStatusChecklistItem, Document } from '../types/api'
 import { formatConfidencePct } from '../lib/format'
@@ -137,7 +137,6 @@ export function ChecklistRow({
   onBringBack,
 }: ChecklistRowProps) {
   const { t } = useTranslation()
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [showReassign, setShowReassign] = useState(false)
   const [showRejectNote, setShowRejectNote] = useState(false)
   const [rejectNote, setRejectNote] = useState('')
@@ -341,25 +340,21 @@ export function ChecklistRow({
         <span className="text-[13px] text-gray-400">{t('checklist.notUploaded')}</span>
       </div>
       <StatusPill tone="grey">{t('checklist.missing')}</StatusPill>
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept="image/*,application/pdf"
-        capture="environment"
-        className="hidden"
-        onChange={(e) => {
-          if (e.target.files && e.target.files.length > 0) onUploadForRow(e.target.files)
-          e.target.value = ''
-        }}
-      />
-      <button
-        type="button"
-        onClick={() => fileInputRef.current?.click()}
-        className="min-h-11 w-[84px] flex-shrink-0 rounded-md border border-blue-200 bg-white px-3.5 py-1.5 text-[13px] font-semibold text-blue-700 hover:bg-blue-50 lg:min-h-0"
-      >
+      {/* Native <label> wrapping a visually hidden input: opens the picker on
+          mobile without a programmatic input.click(). See UploadDropzone. */}
+      <label className="relative flex min-h-11 w-[84px] flex-shrink-0 cursor-pointer items-center justify-center rounded-md border border-blue-200 bg-white px-3.5 py-1.5 text-[13px] font-semibold text-blue-700 hover:bg-blue-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-2 lg:min-h-0">
         {t('checklist.upload')}
-      </button>
+        <input
+          type="file"
+          multiple
+          accept="image/*,application/pdf"
+          className="sr-only"
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) onUploadForRow(e.target.files)
+            e.target.value = ''
+          }}
+        />
+      </label>
       <KebabMenu onMarkReceived={onMarkReceived} onMarkNotApplicable={onMarkNotApplicable} />
     </div>
   )

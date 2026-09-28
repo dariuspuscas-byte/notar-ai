@@ -155,7 +155,7 @@ One `.env` file, gitignored (copy from `.env.example` above), loaded by
 
 | Var | Default | Meaning |
 |---|---|---|
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama server (spec §4.2). Never a hosted endpoint. |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama server (spec §4.2). Never a hosted endpoint. In Docker Compose it defaults to the `ollama` service (`http://ollama:11434`). |
 | `OLLAMA_MODEL` | `llama3.2-vision:11b` | Model tag; must be `ollama pull`ed first. |
 | `OLLAMA_KEEP_ALIVE` | `30m` | Keeps the model resident between requests (spec §4.3/§4.6). |
 | `OLLAMA_TIMEOUT_MS` | `60000` | Per-request timeout; on timeout the document stays `pending_classification`. |

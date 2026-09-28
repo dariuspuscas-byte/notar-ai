@@ -1,16 +1,27 @@
+# OS
 .DS_Store
-.env
-docker-compose.yml
-specs.md
-.vscode/*
-.env.example
-specs/*
 
-# Pythong files
-**/__pycache__/**
+# Secrets / local config (.env.example files ARE committed)
+.env
+.env.local
+*.local
+
+# Editor
+.vscode/*
+
+# Python
+__pycache__/
 *.pyc
+.venv/
 .mypy_cache/
+.pytest_cache/
 *.egg-info/
 
-# Document files / Assets
-**/documents/*
+# Runtime data: local SQLite DB and uploaded documents
+backend/data/*
+!backend/data/documents/
+backend/data/documents/*
+!backend/data/documents/.gitkeep
+
+# Local migration/backup bundles (contain real data)
+migration/
