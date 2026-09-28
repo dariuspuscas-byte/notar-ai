@@ -4,20 +4,35 @@ notar-ai is a document-checklist and verification tool for a Romanian notary off
 
 See `specs/ARCHITECTURE.md` for the full technical specification (service boundaries, data model, API contract, LLM classification design, storage, tech stack, MCP tool design, and the phased backend/frontend build plan). Backend implementation lives under `backend/`, frontend under `frontend/`.
 
-## Local Postgres container (optional)
+## Running with Docker
 
-A `docker-compose.yml` at the repo root stands up a local Postgres instance in Docker. It is **not** wired into the backend — notar-ai still runs on SQLite (`backend/data/notar-ai.db`) per the architecture spec's storage decision. This container exists purely for local experimentation.
+`docker-compose.yml` at the repo root runs the whole stack in containers:
 
-```sh
-cp .env.example .env        # first time only; adjust credentials/port if needed
-docker compose up -d        # start
-docker compose ps           # check health status
-docker compose down         # stop (data persists in the named volume)
-docker compose down -v      # stop and wipe the data volume
-```
-
-Connect once it's up (default credentials, adjust if you changed `.env`):
+| Service | Container | URL |
+|---|---|---|
+| `frontend` (nginx serving the Vite build, proxies `/api` to the backend) | `notarai-frontend` | http://localhost:8080 |
+| `backend` (FastAPI) | `notarai-backend` | http://localhost:3001/api/v1 (health: `/health`) |
+| `postgres` | `notarai-postgres` | `localhost:5432` |
 
 ```sh
-psql "postgresql://notarai:changeme@localhost:5432/notarai"
+cp .env.example .env            # first time only; adjust ports/credentials if needed
+docker compose up -d --build    # build and start everything
+docker compose ps               # check health status
+docker compose logs -f backend  # follow backend logs
+docker compose down             # stop (data persists in named volumes)
+docker compose down -v          # stop and wipe the database and uploaded documents
 ```
+
+On startup the backend container runs `alembic upgrade head` and `seed.py`
+(both idempotent) before starting the API. Set `SKIP_MIGRATIONS=true` on the
+`backend` service to skip them.
+
+Uploaded documents are stored in the `notarai_documents` volume and the
+database in `notarai_postgres_data`.
+
+**Ollama is not containerized.** Run it on the host as usual; the backend
+reaches it at `http://host.docker.internal:11434`. Set `OLLAMA_MODEL` in the
+root `.env` to a model you have pulled (default `llama3.2-vision:11b`).
+
+The frontend image is built with `VITE_ENABLE_MOCKS=false` and
+`VITE_API_BASE_URL=/api/v1`, so it always talks to the real backend.
